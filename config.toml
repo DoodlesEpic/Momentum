@@ -1,0 +1,52 @@
+# Configuração do Momentum.
+# Todos os campos são opcionais: o que faltar assume o padrão do programa.
+
+# Força F = (Fx, Fy, Fz) aplicada no ponto P = (Px, Py, Pz).
+forca = [3.0, -1.0, 2.0]
+ponto = [1.0, 1.0, 0.5]
+
+# Amostragem dos pontos O do espaço.
+planos = 3                  # planos normais à linha de ação de F
+espacamento_planos = 4.5    # distância entre planos consecutivos
+raios = [1.4, 2.8]          # distâncias de O até a linha de ação, em cada plano
+passo_angular = 60.0        # ângulo entre direções vizinhas, em graus
+
+# Escalas de desenho: mudam apenas o tamanho dos traços, não o cálculo.
+escala_forca = 1.0
+escala_momento = 0.22
+comprimento_linha_acao = 14.0
+
+# Saída.
+saida_pdf = "saida/momentum.pdf"
+dpi = 200
+
+[cores]
+forca = "#d62728"    # força e linha de ação (vermelho)
+momento = "#000000"  # vetores M(O) (preto)
+raio = "#2ca02c"     # tracejado de O até Q (verde)
+fecho = "#1f77b4"    # tracejado da ponta de M(O) até Q (azul)
+ponto = "#7f7f7f"    # marcadores dos pontos O e Q
+
+# Vistas geradas, uma por página do PDF.
+# projecao: "persp" (perspectiva) ou "ortho" (ortográfica).
+# axial: alinha a câmera com a linha de ação de F, ignorando elevacao e azimute.
+[[vistas]]
+nome = "Perspectiva isométrica"
+descricao = "Câmera em perspectiva sobre a diagonal do primeiro octante (elevação de 35,264°)."
+projecao = "persp"
+elevacao = 35.264
+azimute = 45.0
+
+[[vistas]]
+nome = "Projeção ortográfica"
+descricao = "Projeção paralela: segmentos paralelos no espaço permanecem paralelos na figura."
+projecao = "ortho"
+elevacao = 25.0
+azimute = -85.0
+
+[[vistas]]
+nome = "Vista axial"
+descricao = "Câmera alinhada com a linha de ação de F: os três planos coincidem e as direções de O aparecem separadas por 60°."
+projecao = "ortho"
+axial = true
+zoom = 1.32
