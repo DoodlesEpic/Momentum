@@ -74,6 +74,9 @@ uv run momentum --config outro.toml   # usa outra configuração
 uv run momentum --saida relatorio.pdf # escolhe o arquivo de saída
 ```
 
+Sem o `uv`, com o ambiente virtual ativado, use `python -m momentum` com as
+mesmas opções.
+
 ### Configuração
 
 Todos os parâmetros ficam em `config.toml`: a força, o ponto de aplicação, a
