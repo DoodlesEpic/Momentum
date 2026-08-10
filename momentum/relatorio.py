@@ -1,6 +1,6 @@
 # Momentum - visualização do campo de momentos de uma força
 # Copyright (C) 2026 Eduardo Lima Moraes
-# Licenciado sob a GNU GPL v3 ou posterior; veja o arquivo LICENSE.
+# Licenciado sob a GNU GPL v3 ou posterior. Veja o arquivo LICENSE.
 
 """Montagem do PDF com as figuras, o código-fonte e os créditos."""
 
@@ -79,7 +79,7 @@ def _capa(cfg: Config, estilos: dict) -> list:
     """Página de rosto: identificação, parâmetros usados e créditos."""
     F, P = cfg.forca, cfg.ponto
     parametros = [
-        f"<b>Força F</b> = {_vetor(F)} &nbsp;&nbsp; (módulo {np.linalg.norm(F):.4g})",
+        f"<b>Força F</b> = {_vetor(F)} de módulo {np.linalg.norm(F):.4g}",
         f"<b>Ponto de aplicação P</b> = {_vetor(P)}",
         f"<b>Planos normais à linha de ação</b>: {cfg.planos}, "
         f"espaçados de {cfg.espacamento_planos:g}",
@@ -94,10 +94,10 @@ def _capa(cfg: Config, estilos: dict) -> list:
         Paragraph("Momentum", estilos["titulo"]),
         Paragraph("Campo de momentos de uma força no espaço", estilos["subtitulo"]),
         Spacer(1, 1.4 * cm),
-        Paragraph(f"{TAREFA} — {DISCIPLINA}", estilos["subtitulo"]),
-        Paragraph("Escola Politécnica da USP — Engenharia de Computação", estilos["subtitulo"]),
+        Paragraph(f"{TAREFA} de {DISCIPLINA}", estilos["subtitulo"]),
+        Paragraph("Escola Politécnica da USP, Engenharia de Computação", estilos["subtitulo"]),
         Spacer(1, 1.4 * cm),
-        Paragraph(f"<b>{AUTOR}</b> — ID USP {ID_USP}", estilos["subtitulo"]),
+        Paragraph(f"<b>{AUTOR}</b>, ID USP {ID_USP}", estilos["subtitulo"]),
         Spacer(1, 1.6 * cm),
         Paragraph("Parâmetros da figura", estilos["secao"]),
     ]
@@ -106,7 +106,7 @@ def _capa(cfg: Config, estilos: dict) -> list:
         Paragraph("O que cada figura mostra", estilos["secao"]),
         Paragraph(
             "Em <b>vermelho</b>, a força F e sua linha de ação. Em <b>preto</b>, os vetores "
-            "momento M(O) = (P − O) × F, desenhados a partir de cada ponto O. Em "
+            "momento M(O) = (P - O) × F, desenhados a partir de cada ponto O. Em "
             "<b>verde tracejado</b>, o segmento que liga O ao ponto Q, pé da perpendicular "
             "baixada de O sobre a linha de ação. Em <b>azul tracejado</b>, o segmento que liga "
             "a extremidade de M(O) ao mesmo ponto Q. Os pontos O pertencem a planos normais à "
@@ -137,7 +137,7 @@ def _paginas_das_figuras(cfg: Config, figuras: list[Figure], estilos: dict) -> l
         altura = largura * figura.get_figheight() / figura.get_figwidth()
         conteudo += [
             Spacer(1, 1.6 * cm),  # aproxima a figura do centro vertical da página
-            Paragraph(f"Figura {indice} — {vista.nome}", estilos["secao"]),
+            Paragraph(f"Figura {indice}: {vista.nome}", estilos["secao"]),
             Image(buffer, width=largura, height=altura),
             Spacer(1, 0.2 * cm),
             Paragraph(vista.descricao, estilos["legenda"]),
@@ -159,7 +159,7 @@ def _codigo_colorido(fonte: str, nome: str) -> str:
     partes = []
     for tipo, valor in lex("\n".join(linhas), get_lexer_for_filename(nome)):
         cor = estilo.style_for_token(tipo)["color"]
-        # Um trecho pode conter quebras de linha; a marcação é aplicada linha a linha.
+        # Um trecho pode conter quebras de linha, então a marcação vai linha a linha.
         for indice, pedaco in enumerate(valor.split("\n")):
             if indice:
                 partes.append("\n")
@@ -194,7 +194,7 @@ def _rodape(canvas, documento) -> None:
     canvas.saveState()
     canvas.setFont("Helvetica", 8)
     canvas.setFillGray(0.4)
-    canvas.drawString(2 * cm, 1.2 * cm, f"Momentum — {TAREFA} — {AUTOR} ({ID_USP})")
+    canvas.drawString(2 * cm, 1.2 * cm, f"Momentum, {TAREFA}, {AUTOR} ({ID_USP})")
     canvas.drawRightString(A4[0] - 2 * cm, 1.2 * cm, str(documento.page))
     canvas.restoreState()
 
@@ -209,7 +209,7 @@ def gerar_pdf(
     documento = SimpleDocTemplate(
         str(caminho),
         pagesize=A4,
-        title=f"Momentum — {TAREFA}",
+        title=f"Momentum - {TAREFA}",
         author=AUTOR,
         subject=DISCIPLINA,
         leftMargin=2 * cm,
