@@ -1,0 +1,24 @@
+# Ambientes virtuais
+.venv/
+venv/
+
+# Artefatos do Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Caches de ferramentas
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Saídas geradas pelo programa (PDF e figuras)
+saida/
+
+# Editores e sistema operacional
+.vscode/
+.idea/
+*.swp
+.DS_Store
