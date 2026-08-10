@@ -29,6 +29,7 @@ class Vista:
     elevacao: float = 30.0
     azimute: float = -60.0
     axial: bool = False  # se verdadeiro, alinha a câmera com a linha de ação de F
+    zoom: float = 1.05  # aproximação da câmera
 
 
 @dataclass
@@ -36,19 +37,19 @@ class Config:
     """Parâmetros da simulação e da visualização."""
 
     # Força e ponto de aplicação
-    forca: tuple = (3.0, 1.0, 2.0)
-    ponto: tuple = (1.0, 2.0, 0.5)
+    forca: tuple = (3.0, -1.0, 2.0)
+    ponto: tuple = (1.0, 1.0, 0.5)
 
     # Amostragem dos pontos O
     planos: int = 3  # quantidade de planos normais à linha de ação
-    espacamento_planos: float = 2.0  # distância entre planos consecutivos
-    raios: tuple = (1.5, 3.0)  # distâncias de O até a linha de ação
+    espacamento_planos: float = 4.5  # distância entre planos consecutivos
+    raios: tuple = (1.4, 2.8)  # distâncias de O até a linha de ação
     passo_angular: float = 60.0  # ângulo entre direções vizinhas, em graus
 
     # Escalas de desenho (apenas visuais, não alteram o cálculo)
     escala_forca: float = 1.0
-    escala_momento: float = 0.25
-    comprimento_linha_acao: float = 9.0
+    escala_momento: float = 0.22
+    comprimento_linha_acao: float = 14.0
 
     cores: dict = field(default_factory=dict)
 
@@ -65,14 +66,15 @@ class Config:
                 "nome": "Projeção ortográfica",
                 "descricao": "Projeção paralela: segmentos paralelos permanecem paralelos.",
                 "projecao": "ortho",
-                "elevacao": 22.0,
-                "azimute": -55.0,
+                "elevacao": 25.0,
+                "azimute": -85.0,
             },
             {
                 "nome": "Vista axial",
                 "descricao": "Câmera alinhada com a linha de ação de F, que aparece como um ponto.",
                 "projecao": "ortho",
                 "axial": True,
+                "zoom": 1.32,
             },
         ]
     )
