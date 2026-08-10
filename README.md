@@ -84,6 +84,15 @@ quantidade e o espaçamento dos planos, os raios e o passo angular das direçõe
 as escalas de desenho, as cores e a lista de vistas. Editar esse arquivo é
 suficiente para alterar a visualização, sem nenhuma mudança no código.
 
+### Automação
+
+O fluxo em [.github/workflows/momentum.yml](.github/workflows/momentum.yml)
+roda a cada push na branch `main` e também sob demanda pelo botão de execução
+manual do GitHub Actions. Ele instala as dependências, executa o programa e
+guarda o PDF como artefato da execução. Quando a versão declarada no
+`pyproject.toml` ainda não tem release, o fluxo cria a tag `vX.Y.Z` e publica
+uma release com o código-fonte e o PDF gerado.
+
 ## Licença
 
 Distribuído sob a GNU General Public License v3.0 ou posterior. O texto
