@@ -1,0 +1,30 @@
+# Normaliza os finais de linha: LF no repositório, nativo na cópia de trabalho.
+* text=auto
+
+# Arquivos de texto do projeto
+*.py    text diff=python
+*.toml  text
+*.md    text diff=markdown
+*.txt   text
+*.cfg   text
+*.yml   text
+*.json  text
+*.svg   text
+
+# Scripts precisam de finais de linha fixos
+*.sh    text eol=lf
+*.bat   text eol=crlf
+
+# Arquivos binários: sem conversão de finais de linha e sem diff textual
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.zip   binary
+*.gz    binary
+*.whl   binary
+*.ttf   binary
+*.otf   binary
+*.npy   binary
