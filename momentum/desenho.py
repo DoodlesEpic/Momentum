@@ -1,6 +1,6 @@
 # Momentum - visualização do campo de momentos de uma força
 # Copyright (C) 2026 Eduardo Lima Moraes
-# Licenciado sob a GNU GPL v3 ou posterior; veja o arquivo LICENSE.
+# Licenciado sob a GNU GPL v3 ou posterior. Veja o arquivo LICENSE.
 
 """Desenho das figuras do campo de momentos com Matplotlib."""
 
