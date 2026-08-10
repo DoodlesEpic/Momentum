@@ -1,0 +1,66 @@
+# Gera o PDF a cada push na main e publica uma release quando a versão muda.
+name: PDF e release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pdf:
+    name: Gerar o PDF e publicar a release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter o código
+        uses: actions/checkout@v4
+
+      - name: Instalar o uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Instalar as dependências
+        run: uv sync --frozen
+
+      - name: Executar o Momentum
+        run: uv run momentum
+
+      - name: Guardar o PDF como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: momentum-pdf
+          path: saida/momentum.pdf
+          if-no-files-found: error
+
+      - name: Ler a versão do projeto
+        id: versao
+        run: echo "numero=$(uv version --short)" >> "$GITHUB_OUTPUT"
+
+      # A release só é criada na primeira vez que a versão aparece na main.
+      - name: Verificar se a versão já tem release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ steps.versao.outputs.numero }}
+        run: |
+          if gh release view "v$VERSAO" > /dev/null 2>&1
+          then
+            echo "publicar=nao" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicar=sim" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publicar a release com o código e o PDF
+        if: steps.release.outputs.publicar == 'sim'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSAO: ${{ steps.versao.outputs.numero }}
+        run: |
+          cp saida/momentum.pdf "momentum-v$VERSAO.pdf"
+          gh release create "v$VERSAO" "momentum-v$VERSAO.pdf" \
+            --target "$GITHUB_SHA" \
+            --title "Momentum v$VERSAO" \
+            --notes "Código-fonte e relatório em PDF da versão $VERSAO, gerados automaticamente."
