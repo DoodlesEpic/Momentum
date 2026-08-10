@@ -19,7 +19,10 @@ def _argumentos() -> argparse.Namespace:
         description="Desenha o campo de momentos de uma força e gera um relatório em PDF.",
     )
     analisador.add_argument(
-        "-c", "--config", default=None, help=f"arquivo TOML de configuração (padrão: {CONFIG_PADRAO.name})"
+        "-c",
+        "--config",
+        default=None,
+        help=f"arquivo TOML de configuração (padrão: {CONFIG_PADRAO.name})",
     )
     analisador.add_argument("-s", "--saida", default=None, help="caminho do PDF gerado")
     analisador.add_argument("--version", action="version", version=f"Momentum {__version__}")

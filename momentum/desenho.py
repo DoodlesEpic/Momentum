@@ -46,7 +46,7 @@ def figura(cfg: Config, amostras: list[campo.Amostra], vista: Vista) -> Figure:
     """Monta a figura de uma vista do campo de momentos."""
     cores = cfg.cores
     inicio, fim = campo.extremos_da_linha_de_acao(cfg)
-    pontas = [O + M * cfg.escala_momento for O, M in ((a.O, a.M) for a in amostras)]
+    pontas = [a.O + a.M * cfg.escala_momento for a in amostras]  # extremidades de M(O)
 
     fig = plt.figure(figsize=(7.4, 5.6))
     ax = fig.add_subplot(projection="3d")
@@ -87,8 +87,9 @@ def figura(cfg: Config, amostras: list[campo.Amostra], vista: Vista) -> Figure:
     pontos = np.array([a.O for a in amostras] + [a.Q for a in amostras])
     ax.scatter(pontos[:, 0], pontos[:, 1], pontos[:, 2], color=cores["ponto"], s=6)
 
+    ponta_da_forca = cfg.ponto + cfg.forca * cfg.escala_forca
     inferior, superior = _cubo_envolvente(
-        np.vstack([pontos, np.array(pontas), inicio, fim, cfg.ponto + cfg.forca * cfg.escala_forca])
+        np.vstack([pontos, np.array(pontas), inicio, fim, ponta_da_forca])
     )
     ax.set_xlim(inferior[0], superior[0])
     ax.set_ylim(inferior[1], superior[1])

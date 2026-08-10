@@ -19,6 +19,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.platypus import (
+    CondPageBreak,
     Image,
     PageBreak,
     Paragraph,
@@ -35,7 +36,7 @@ ID_USP = "16802140"
 DISCIPLINA = "PME0100 - Mecânica I (2026)"
 TAREFA = "Tarefa Optativa 1"
 
-LARGURA_CODIGO = 108  # colunas por linha na listagem do código
+LARGURA_CODIGO = 110  # colunas por linha na listagem do código
 ESTILO_CODIGO = "friendly"
 
 
@@ -54,11 +55,18 @@ def _estilos() -> dict:
         "texto": ParagraphStyle(
             "texto", parent=base["Normal"], fontSize=10, leading=14, spaceAfter=3
         ),
+        "arquivo": ParagraphStyle(  # nome do arquivo na listagem, colado ao seu código
+            "arquivo",
+            parent=base["Normal"],
+            fontSize=10,
+            leading=14,
+            spaceAfter=6,
+        ),
         "legenda": ParagraphStyle(
             "legenda", parent=base["Normal"], fontSize=9, leading=12, alignment=TA_CENTER
         ),
         "codigo": ParagraphStyle(
-            "codigo", parent=base["Code"], fontName="Courier", fontSize=6.6, leading=8.0
+            "codigo", parent=base["Code"], fontName="Courier", fontSize=7.2, leading=8.6
         ),
     }
 
@@ -173,8 +181,9 @@ def _paginas_do_codigo(arquivos: list[Path], estilos: dict) -> list:
     for arquivo in arquivos:
         fonte = arquivo.read_text(encoding="utf-8")
         conteudo += [
-            Paragraph(f"<b>{escape(arquivo.name)}</b>", estilos["texto"]),
-            Spacer(1, 0.15 * cm),
+            # Evita que o nome do arquivo fique sozinho no pé da página.
+            CondPageBreak(3 * cm),
+            Paragraph(f"<b>{escape(arquivo.name)}</b>", estilos["arquivo"]),
             XPreformatted(_codigo_colorido(fonte, arquivo.name), estilos["codigo"]),
             Spacer(1, 0.5 * cm),
         ]

@@ -46,7 +46,7 @@ azimute = -85.0
 
 [[vistas]]
 nome = "Vista axial"
-descricao = "Câmera alinhada com a linha de ação de F: os três planos coincidem e as direções de O aparecem separadas por 60°."
+descricao = "Câmera alinhada com a linha de ação de F: os planos coincidem e as direções de O ficam a 60°."
 projecao = "ortho"
 axial = true
 zoom = 1.32
