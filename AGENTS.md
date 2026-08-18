@@ -62,7 +62,8 @@ além das figuras e da tabela de resultados.
   ortográfica e uma terceira de outra maneira, hoje a vista axial alinhada com a
   linha de ação da força.
 - O PDF credita Eduardo Lima Moraes, ID USP 16802140, e também o Claude.
-- Tudo que muda a visualização fica no `config.toml`, sem precisar editar código.
+- Tudo que muda a visualização fica em `config_tarefa_1.toml` ou
+  `config_tarefa_2.toml`, sem precisar editar código.
 
 ## Automação
 
