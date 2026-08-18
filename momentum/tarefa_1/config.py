@@ -1,8 +1,8 @@
-# Momentum - visualização do campo de momentos de uma força
+# Momentum - programas das tarefas optativas de PME0100 Mecânica I
 # Copyright (C) 2026 Eduardo Lima Moraes
 # Licenciado sob a GNU GPL v3 ou posterior. Veja o arquivo LICENSE.
 
-"""Configuração do programa, lida de um arquivo TOML."""
+"""Configuração da Tarefa 1, lida de um arquivo TOML."""
 
 import tomllib
 from dataclasses import dataclass, field
@@ -10,49 +10,38 @@ from pathlib import Path
 
 import numpy as np
 
+from ..comum import cena
+
 CORES_PADRAO = {
-    "forca": "#d62728",  # força e linha de ação (vermelho)
-    "momento": "#000000",  # vetores M(O) (preto)
-    "raio": "#2ca02c",  # tracejado de O até Q (verde)
-    "fecho": "#1f77b4",  # tracejado da ponta de M(O) até Q (azul)
-    "ponto": "#7f7f7f",  # marcadores dos pontos O e Q
+    "forca": "#d62728",
+    "momento": "#000000",
+    "raio": "#2ca02c",
+    "fecho": "#1f77b4",
+    "ponto": "#7f7f7f",
 }
 
 
 @dataclass
-class Vista:
-    """Uma das visualizações geradas."""
+class Vista(cena.Vista):
+    """Vista da Tarefa 1, que também pode ser axial."""
 
-    nome: str
-    descricao: str = ""
-    projecao: str = "persp"  # "persp" (perspectiva) ou "ortho" (ortográfica)
-    elevacao: float = 30.0
-    azimute: float = -60.0
-    axial: bool = False  # se verdadeiro, alinha a câmera com a linha de ação de F
-    zoom: float = 1.05  # aproximação da câmera
+    axial: bool = False
 
 
 @dataclass
 class Config:
     """Parâmetros da simulação e da visualização."""
 
-    # Força e ponto de aplicação
     forca: tuple = (3.0, -1.0, 2.0)
     ponto: tuple = (1.0, 1.0, 0.5)
-
-    # Amostragem dos pontos O
-    planos: int = 3  # quantidade de planos normais à linha de ação
-    espacamento_planos: float = 4.5  # distância entre planos consecutivos
-    raios: tuple = (1.4, 2.8)  # distâncias de O até a linha de ação
-    passo_angular: float = 60.0  # ângulo entre direções vizinhas, em graus
-
-    # Escalas de desenho (apenas visuais, não alteram o cálculo)
+    planos: int = 3
+    espacamento_planos: float = 4.5
+    raios: tuple = (1.4, 2.8)
+    passo_angular: float = 60.0
     escala_forca: float = 1.0
     escala_momento: float = 0.22
     comprimento_linha_acao: float = 14.0
-
     cores: dict = field(default_factory=dict)
-
     vistas: list = field(
         default_factory=lambda: [
             {
@@ -78,21 +67,21 @@ class Config:
             },
         ]
     )
-
-    # Saída
-    saida_pdf: str = "saida/momentum.pdf"
+    saida_pdf: str = "saida/tarefa_1.pdf"
     dpi: int = 200
 
     def __post_init__(self) -> None:
         self.forca = np.asarray(self.forca, dtype=float)
         self.ponto = np.asarray(self.ponto, dtype=float)
         self.raios = tuple(float(r) for r in self.raios)
-        self.cores = CORES_PADRAO | self.cores  # cores omitidas mantêm o padrão
+        self.cores = CORES_PADRAO | self.cores
         self.vistas = [v if isinstance(v, Vista) else Vista(**v) for v in self.vistas]
         self.validar()
 
     def validar(self) -> None:
         """Rejeita configurações que não produzem uma figura válida."""
+        if self.forca.shape != (3,) or self.ponto.shape != (3,):
+            raise ValueError("a força e o ponto devem ter três componentes")
         if np.allclose(self.forca, 0.0):
             raise ValueError("a força não pode ser nula: ela define a linha de ação")
         if self.planos < 1:
@@ -104,7 +93,7 @@ class Config:
 
 
 def carregar(caminho: str | Path | None = None) -> Config:
-    """Lê a configuração do arquivo TOML, completando o que faltar com os padrões."""
+    """Lê o TOML, completando os campos omitidos com os padrões."""
     dados: dict = {}
     if caminho is not None:
         arquivo = Path(caminho)
