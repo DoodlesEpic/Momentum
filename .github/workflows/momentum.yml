@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: momentum-pdf
-          path: saida/momentum.pdf
+          path: saida/
           if-no-files-found: error
 
       - name: Ler a versão do projeto
@@ -59,8 +59,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSAO: ${{ steps.versao.outputs.numero }}
         run: |
-          cp saida/momentum.pdf "momentum-v$VERSAO.pdf"
-          gh release create "v$VERSAO" "momentum-v$VERSAO.pdf" \
+          cp saida/tarefa_1.pdf "momentum-tarefa-1-v$VERSAO.pdf"
+          cp saida/tarefa_2.pdf "momentum-tarefa-2-v$VERSAO.pdf"
+          gh release create "v$VERSAO" "momentum-tarefa-1-v$VERSAO.pdf" "momentum-tarefa-2-v$VERSAO.pdf" \
             --target "$GITHUB_SHA" \
             --title "Momentum v$VERSAO" \
             --notes "Código-fonte e relatório em PDF da versão $VERSAO, gerados automaticamente."
