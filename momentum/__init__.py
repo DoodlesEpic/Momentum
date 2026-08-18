@@ -1,7 +1,7 @@
-# Momentum - visualização do campo de momentos de uma força
+# Momentum - programas das tarefas optativas de PME0100 Mecânica I
 # Copyright (C) 2026 Eduardo Lima Moraes
 # Licenciado sob a GNU GPL v3 ou posterior. Veja o arquivo LICENSE.
 
-"""Momentum: desenha o campo de momentos de uma força no espaço."""
+"""Programas das tarefas optativas de PME0100 Mecânica I."""
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
