@@ -20,16 +20,13 @@ sobre a linha de ação) e as retas tracejadas azuis da extremidade de `M(O)` at
 o mesmo `Q`. Os pontos `O` ficam em planos normais à linha de ação, espaçados
 igualmente, e em cada plano as direções são separadas por 60 graus.
 
-O código dessa tarefa ainda ocupa a raiz do pacote e será movido para um módulo
-próprio.
-
 ### Tarefa 2
 
-Ainda não implementada. O enunciado está em [tarefa_2.md](tarefa_2.md) e pede a
-redução de um sistema de `n` forças aplicadas a um corpo rígido: a resultante, os
-momentos em dois polos, o torque em um eixo, o invariante escalar, a
-caracterização do sistema e, quando existirem, o eixo central e o momento mínimo,
-além das figuras e da tabela de resultados.
+Reduz sistemas de `n` forças aplicadas a um corpo rígido. O enunciado está em
+[tarefa_2.md](tarefa_2.md) e calcula a resultante, os momentos em dois polos, o
+torque em um eixo, o invariante escalar, a caracterização do sistema e, quando
+existirem, o eixo central e o momento mínimo, além das figuras e da tabela de
+resultados.
 
 ## Idioma e escrita
 
