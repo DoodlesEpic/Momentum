@@ -1,0 +1,104 @@
+# Configuração dos exemplos da Tarefa Optativa 2.
+
+tolerancia = 1e-9
+saida_pdf = "saida/tarefa_2.pdf"
+dpi = 200
+
+[solido]
+canto = [0.0, 0.0, 0.0]
+dimensoes = [4.0, 3.0, 2.0]
+
+[cores]
+forca = "#d62728"
+resultante = "#9467bd"
+momento = "#000000"
+eixo_au = "#1f77b4"
+eixo_central = "#2ca02c"
+polo = "#ff7f0e"
+solido = "#bdbdbd"
+
+[[vistas]]
+nome = "Perspectiva geral"
+descricao = "Perspectiva escolhida para identificar forças, polos e momentos."
+projecao = "persp"
+elevacao = 26.0
+azimute = -48.0
+
+[[vistas]]
+nome = "Perspectiva do eixo central"
+descricao = "Perspectiva escolhida para evidenciar a resultante e o momento mínimo."
+projecao = "persp"
+elevacao = 22.0
+azimute = -58.0
+
+[[casos]]
+nome = "Sistema nulo"
+descricao = "Duas forças opostas na mesma linha de ação se anulam completamente."
+forcas = [[5.0, 0.0, 0.0], [-5.0, 0.0, 0.0]]
+pontos = [[0.0, 1.0, 1.0], [4.0, 1.0, 1.0]]
+polo_q = [2.0, 1.5, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [0.0, 0.0, 1.0]
+
+[[casos]]
+nome = "Binário"
+descricao = "Duas forças opostas em linhas paralelas distintas formam um binário."
+forcas = [[0.0, 0.0, 4.0], [0.0, 0.0, -4.0]]
+pontos = [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0]]
+polo_q = [2.0, 1.5, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [0.0, 1.0, 0.0]
+
+[[casos]]
+nome = "Uma força"
+descricao = "Uma única força verifica o caso n = 1 e recupera sua própria linha de ação."
+forcas = [[0.0, 0.0, 5.0]]
+pontos = [[1.0, 1.0, 0.0]]
+polo_q = [2.0, 1.0, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [0.0, 0.0, 1.0]
+
+[[casos]]
+nome = "Forças concorrentes"
+descricao = "Três linhas de ação passam pelo mesmo vértice do sólido."
+forcas = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+pontos = [[4.0, 0.0, 0.0], [0.0, 3.0, 0.0], [0.0, 0.0, 2.0]]
+polo_q = [2.0, 1.5, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [0.0, 0.0, 1.0]
+
+[[casos]]
+nome = "Forças coplanares"
+descricao = "Três linhas não concorrentes pertencem ao plano da face inferior do sólido."
+forcas = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]]
+pontos = [[0.0, 0.0, 0.0], [2.0, 1.0, 0.0], [0.0, 2.0, 0.0]]
+polo_q = [2.0, 1.5, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [0.0, 1.0, 0.0]
+
+[[casos]]
+nome = "Forças paralelas"
+descricao = "Três forças verticais em linhas paralelas e não coplanares."
+forcas = [[0.0, 0.0, 2.0], [0.0, 0.0, 3.0], [0.0, 0.0, -1.0]]
+pontos = [[0.0, 0.0, 0.0], [4.0, 0.0, 0.0], [0.0, 3.0, 0.0]]
+polo_q = [2.0, 1.5, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [0.0, 0.0, 1.0]
+
+[[casos]]
+nome = "Força no caso geral"
+descricao = "Uma força com um binário perpendicular produz uma única força sem disposição especial."
+forcas = [[0.0, 2.0, 0.0], [0.0, -2.0, 0.0], [0.0, 0.0, 5.0]]
+pontos = [[0.0, 0.0, 0.0], [0.0, 0.0, 1.0], [2.0, 1.0, 0.0]]
+polo_q = [2.0, 1.5, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [1.0, 0.0, 0.0]
+
+[[casos]]
+nome = "Força mais binário"
+descricao = "Três forças em arestas reversas formam um torsor geral com invariante não nulo."
+forcas = [[4.0, 0.0, 0.0], [0.0, 3.0, 0.0], [0.0, 0.0, 2.0]]
+pontos = [[0.0, 0.0, 0.0], [4.0, 0.0, 1.0], [0.0, 3.0, 0.0]]
+polo_q = [2.0, 1.5, 1.0]
+polo_a = [0.0, 0.0, 0.0]
+versor_u = [1.0, 1.0, 1.0]
