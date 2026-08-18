@@ -17,7 +17,7 @@ escala_momento = 0.22
 comprimento_linha_acao = 14.0
 
 # Saída.
-saida_pdf = "saida/momentum.pdf"
+saida_pdf = "saida/tarefa_1.pdf"
 dpi = 200
 
 [cores]
