@@ -4,7 +4,7 @@ Programas das tarefas optativas de PME0100 Mecânica I (2026), da Engenharia de
 Computação da Escola Politécnica da USP.
 
 O projeto gera um PDF por tarefa. Cada relatório contém capa, resultados,
-figuras tridimensionais e a listagem completa do código que o produziu.
+figuras tridimensionais e a listagem do código de cálculo e configuração.
 
 ## Tarefas
 

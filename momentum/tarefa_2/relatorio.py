@@ -22,30 +22,26 @@ def _parametros(cfg: Config) -> list[str]:
     return [
         f"<b>Casos analisados</b>: {len(cfg.casos)}",
         f"<b>Tolerância numérica</b>: {cfg.tolerancia:.3g}",
-        f"<b>Paralelepípedo</b>: canto {documento.vetor(cfg.solido.canto)}, "
+        f"<b>Paralelepípedo de referência</b>: canto {documento.vetor(cfg.solido.canto)}, "
         f"dimensões {documento.vetor(cfg.solido.dimensoes)}",
-        f"<b>Escalas das setas</b>: forças {cfg.escala_forca:g}, "
-        f"momentos {cfg.escala_momento:g}",
-        f"<b>Comprimento dos eixos desenhados</b>: {cfg.comprimento_eixo:g} vezes "
-        "a maior dimensão do sólido",
     ]
 
 
 def _tabela_resumo(reducoes: list[Reducao]):
     """Tabela que evidencia a cobertura das categorias pedidas."""
     linhas = [
-        [reducao.caso.nome, reducao.tipo, reducao.disposicao.descricao]
+        [reducao.caso.nome, reducao.caso.descricao, reducao.tipo]
         for reducao in reducoes
     ]
     return documento.tabela(
-        ["Caso", "Caracterização", "Disposição detectada"],
+        ["Caso", "Descrição", "Caracterização"],
         linhas,
-        [4.2 * cm, 6.0 * cm, 6.8 * cm],
+        [3.8 * cm, 7.2 * cm, 6.0 * cm],
     )
 
 
 def _tabelas_de_entrada(reducao: Reducao) -> list:
-    """Tabela forças e pontos, seguida dos polos e do versor do eixo."""
+    """Tabela de forças e pontos, seguida dos polos e do versor do eixo."""
     caso = reducao.caso
     linhas = [
         [str(indice), documento.vetor(forca), documento.vetor(ponto)]
@@ -67,7 +63,7 @@ def _tabelas_de_entrada(reducao: Reducao) -> list:
 
 
 def _tabela_de_resultados(reducao: Reducao):
-    """Tabela com todas as saídas numéricas e geométricas do enunciado."""
+    """Tabela com as saídas numéricas e geométricas do enunciado."""
     linhas = [
         ["Resultante R", documento.vetor(reducao.resultante)],
         ["Momento M_Q", documento.vetor(reducao.momento_q)],
@@ -75,15 +71,7 @@ def _tabela_de_resultados(reducao: Reducao):
         ["Torque no eixo Au", f"{reducao.torque:.6g}"],
         ["Invariante escalar I", f"{reducao.invariante:.6g}"],
         ["Caracterização", reducao.tipo],
-        ["Disposição", reducao.disposicao.descricao],
     ]
-    if reducao.disposicao.ponto_de_concorrencia is not None:
-        linhas.append(
-            [
-                "Ponto de concorrência",
-                documento.vetor(reducao.disposicao.ponto_de_concorrencia),
-            ]
-        )
     if reducao.eixo_central is not None and reducao.momento_minimo is not None:
         linhas += [
             [
@@ -94,13 +82,16 @@ def _tabela_de_resultados(reducao: Reducao):
             ["Momento mínimo M_E", documento.vetor(reducao.momento_minimo)],
         ]
     else:
-        linhas.append(["Eixo central e momento mínimo", "não existem"])
+        linhas += [
+            ["Eixo central", "não existe"],
+            ["Momento mínimo M_E", "não existe"],
+        ]
     return documento.tabela(["Resultado", "Valor"], linhas, [5.0 * cm, 11.0 * cm])
 
 
 def _pagina_do_caso(reducao: Reducao, estilos: dict) -> list:
     """Conteúdo tabular que antecede as figuras de um caso."""
-    conteudo = [
+    return [
         Paragraph(reducao.caso.nome, estilos["secao"]),
         Paragraph(reducao.caso.descricao, estilos["texto"]),
         Spacer(1, 0.25 * cm),
@@ -111,7 +102,6 @@ def _pagina_do_caso(reducao: Reducao, estilos: dict) -> list:
         _tabela_de_resultados(reducao),
         PageBreak(),
     ]
-    return conteudo
 
 
 def gerar_pdf(
@@ -126,12 +116,9 @@ def gerar_pdf(
         raise ValueError("cada redução precisa das suas figuras")
     estilos = documento.estilos()
     explicacao = (
-        "Para cada sistema, o programa calcula a resultante R, os momentos M_Q e M_A, "
-        "o torque no eixo Au e o invariante escalar I. Em seguida caracteriza o sistema, "
-        "detecta disposições concorrentes, coplanares e paralelas, e determina o eixo "
-        "central e o momento mínimo quando a resultante não é nula. As identidades de "
-        "transporte do momento, de invariância escalar e de mínimo no eixo central são "
-        "verificadas antes de o resultado ser incluído no documento."
+        "Para cada sistema de forças, o programa calcula a resultante R, os momentos M_Q e M_A, "
+        "o torque no eixo Au e o invariante escalar I. Em seguida caracteriza o sistema "
+        "e determina o eixo central e o momento mínimo quando a resultante não é nula."
     )
     conteudo = documento.capa(
         "Redução de sistemas de forças no espaço",
@@ -143,8 +130,8 @@ def gerar_pdf(
     conteudo += [
         Paragraph("Cobertura dos casos", estilos["secao"]),
         Paragraph(
-            "Os exemplos abaixo abrangem as quatro categorias do enunciado e as "
-            "disposições especiais solicitadas para sistemas redutíveis a uma única força.",
+            "Os exemplos abaixo abrangem as quatro categorias do enunciado e os casos particulares "
+            "de uma única força, forças concorrentes, forças coplanares e forças paralelas.",
             estilos["texto"],
         ),
         Spacer(1, 0.25 * cm),
