@@ -30,13 +30,13 @@ def _parametros(cfg: Config) -> list[str]:
 def _tabela_resumo(reducoes: list[Reducao]):
     """Tabela que evidencia a cobertura das categorias pedidas."""
     linhas = [
-        [reducao.caso.nome, reducao.caso.descricao, reducao.tipo]
+        [reducao.caso.nome, reducao.tipo]
         for reducao in reducoes
     ]
     return documento.tabela(
-        ["Caso", "Descrição", "Caracterização"],
+        ["Caso", "Caracterização"],
         linhas,
-        [3.8 * cm, 7.2 * cm, 6.0 * cm],
+        [7.0 * cm, 9.0 * cm],
     )
 
 
@@ -48,7 +48,7 @@ def _tabelas_de_entrada(reducao: Reducao) -> list:
         for indice, (forca, ponto) in enumerate(zip(caso.forcas, caso.pontos), start=1)
     ]
     tabela_forcas = documento.tabela(
-        ["i", "Fᵢ", "Pᵢ"], linhas, [1.0 * cm, 7.5 * cm, 7.5 * cm]
+        ["i", "F_i", "P_i"], linhas, [1.0 * cm, 7.5 * cm, 7.5 * cm]
     )
     tabela_elementos = documento.tabela(
         ["Elemento", "Valor"],

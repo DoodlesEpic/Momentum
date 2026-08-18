@@ -46,7 +46,7 @@ def _marcas_reducao(cfg: Config, reducao: Reducao) -> list[Line2D]:
     """Marcas da legenda da primeira figura."""
     cores = cfg.cores
     marcas = [
-        Line2D([], [], color=cores["forca"], lw=2, label="forças Fᵢ"),
+        Line2D([], [], color=cores["forca"], lw=2, label="forças F_i"),
         Line2D([], [], color=cores["polo"], marker="o", lw=0, label="polos Q e A"),
         Line2D([], [], color=cores["eixo_au"], lw=1.2, ls="--", label="eixo Au"),
     ]
@@ -63,7 +63,7 @@ def _marcas_eixo_central(cfg: Config, reducao: Reducao) -> list[Line2D]:
     """Marcas da legenda da segunda figura."""
     cores = cfg.cores
     marcas = [
-        Line2D([], [], color=cores["forca"], lw=2, label="forças Fᵢ"),
+        Line2D([], [], color=cores["forca"], lw=2, label="forças F_i"),
         Line2D([], [], color=cores["momento"], lw=1.5, label="momento M_Q"),
         Line2D([], [], color=cores["eixo_central"], lw=1.8, ls="--", label="eixo central"),
         Line2D([], [], color=cores["resultante"], lw=2, label="resultante R"),
