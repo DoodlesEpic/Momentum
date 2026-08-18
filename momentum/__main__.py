@@ -44,11 +44,14 @@ def _caminho_config(tarefa: str, argumento: str | None) -> Path | None:
 
 
 def _arquivos_do_codigo(tarefa: str, caminho_config: Path | None) -> list[Path]:
-    """Fontes que entram na listagem do PDF da tarefa escolhida."""
+    """Fontes essenciais de calculo e configuracao que entram no PDF da tarefa."""
     pacote = Path(__file__).parent
-    arquivos = [pacote / "__init__.py", pacote / "__main__.py"]
-    arquivos += sorted((pacote / "comum").glob("*.py"))
-    arquivos += sorted((pacote / tarefa.replace("tarefa", "tarefa_")).glob("*.py"))
+    modulo_calculo = "campo.py" if tarefa == "tarefa1" else "sistema.py"
+    subpacote = tarefa.replace("tarefa", "tarefa_")
+    arquivos = [
+        pacote / "comum" / "vetores.py",
+        pacote / subpacote / modulo_calculo,
+    ]
     if caminho_config is not None and caminho_config.exists():
         arquivos.append(caminho_config)
     return arquivos
