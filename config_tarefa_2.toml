@@ -3,6 +3,10 @@
 tolerancia = 1e-9
 saida_pdf = "saida/tarefa_2.pdf"
 dpi = 200
+escala_forca = 0.36
+escala_momento = 0.28
+comprimento_eixo = 1.5
+opacidade_solido = 0.14
 
 [solido]
 canto = [0.0, 0.0, 0.0]

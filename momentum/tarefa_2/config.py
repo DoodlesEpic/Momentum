@@ -77,6 +77,10 @@ class Config:
     tolerancia: float = 1e-9
     saida_pdf: str = "saida/tarefa_2.pdf"
     dpi: int = 200
+    escala_forca: float = 0.36
+    escala_momento: float = 0.28
+    comprimento_eixo: float = 1.5
+    opacidade_solido: float = 0.14
     solido: Solido | dict = field(default_factory=Solido)
     cores: dict = field(default_factory=dict)
     vistas: list = field(
@@ -108,6 +112,12 @@ class Config:
             raise ValueError("a tolerância deve ser positiva")
         if self.dpi < 1:
             raise ValueError("o dpi deve ser positivo")
+        if self.escala_forca <= 0.0 or self.escala_momento <= 0.0:
+            raise ValueError("as escalas de desenho devem ser positivas")
+        if self.comprimento_eixo <= 0.0:
+            raise ValueError("o comprimento do eixo deve ser positivo")
+        if not 0.0 < self.opacidade_solido <= 1.0:
+            raise ValueError("a opacidade do sólido deve estar em (0, 1]")
         if len(self.vistas) < 2:
             raise ValueError("são necessárias duas vistas, uma para cada tipo de figura")
         if not self.casos:
