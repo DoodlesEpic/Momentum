@@ -1,57 +1,61 @@
 # Momentum
 
-Visualização do campo de momentos de uma força no espaço.
+Programas das tarefas optativas de PME0100 Mecânica I (2026), da Engenharia de
+Computação da Escola Politécnica da USP.
 
-## Introdução
+O projeto gera um PDF por tarefa. Cada relatório contém capa, resultados,
+figuras tridimensionais e a listagem completa do código que o produziu.
 
-O Momentum é um pequeno programa em Python que desenha o campo de momentos
-de uma força `F = (Fx, Fy, Fz)` aplicada em um ponto `P = (Px, Py, Pz)`.
+## Tarefas
 
-Para cada ponto `O` do espaço, o momento da força em relação a `O` é
+### Tarefa 1
+
+A [Tarefa 1](tarefa_1.md) visualiza o campo de momentos de uma força
+`F = (Fx, Fy, Fz)` aplicada em um ponto `P = (Px, Py, Pz)`. Para cada ponto
+`O`, o momento é:
 
 ```
 M(O) = (P - O) x F
 ```
 
-Como o momento não se altera ao deslocar o ponto de aplicação ao longo da linha
-de ação de `F`, o campo depende apenas da distância de `O` até essa linha. O
-programa explora essa propriedade amostrando os pontos `O` em planos normais à
-linha de ação e igualmente espaçados, e desenhando, em cada plano, direções
-separadas por ângulos iguais (60° por padrão).
+As figuras mostram a força e sua linha de ação em vermelho, os momentos em
+preto, os segmentos de `O` ao pé da perpendicular em verde tracejado e os
+segmentos entre esse pé e a ponta de cada momento em azul tracejado.
 
-Este é o trabalho da Tarefa Optativa 1 da disciplina PME0100 Mecânica I
-(2026), da Engenharia de Computação da Escola Politécnica da USP.
+### Tarefa 2
 
-## Visão Geral
+A [Tarefa 2](tarefa_2.md) reduz sistemas de `n` forças aplicadas a um corpo
+rígido. Para cada caso, o programa calcula a resultante `R`, os momentos nos
+polos `Q` e `A`, o torque no eixo `Au`, o invariante escalar `I`, a
+caracterização do sistema, o eixo central e o momento mínimo quando existem.
 
-Cada figura gerada mostra:
+As quatro categorias do enunciado são classificadas por tolerância numérica:
 
-| Elemento | Cor / traço |
+| Resultante | Invariante | Sistema |
+| --- | --- | --- |
+| nula | momento nulo | nulo |
+| nula | momento não nulo | redutível a um binário |
+| não nula | nulo | redutível a uma única força |
+| não nula | não nulo | redutível a força mais binário |
+
+O relatório padrão traz oito exemplos. Eles cobrem as quatro categorias e,
+entre os sistemas redutíveis a uma única força, os casos de uma força, linhas
+concorrentes, forças coplanares, forças paralelas e o caso geral. As forças e
+os pontos de aplicação são mostrados em um paralelepípedo configurável.
+
+## Estrutura
+
+| Caminho | Conteúdo |
 | --- | --- |
-| Força `F` e sua linha de ação | vermelho |
-| Vetores momento `M(O)` | preto |
-| Segmentos de `O` até `Q` (pé da perpendicular à linha de ação) | verde tracejado |
-| Segmentos da extremidade de `M(O)` até `Q` | azul tracejado |
+| `momentum/comum/vetores.py` | álgebra vetorial e geometria de retas |
+| `momentum/comum/cena.py` | primitivas para as cenas 3D |
+| `momentum/comum/documento.py` | elementos compartilhados dos PDFs |
+| `momentum/tarefa_1/` | campo de momentos de uma força |
+| `momentum/tarefa_2/` | redução de sistemas de forças |
+| `config_tarefa_1.toml` | parâmetros e vistas da Tarefa 1 |
+| `config_tarefa_2.toml` | casos, sólido, escalas e vistas da Tarefa 2 |
 
-O programa produz um único arquivo PDF contendo:
-
-1. a capa com os parâmetros usados e os créditos
-2. três visualizações do campo, em perspectiva isométrica, em projeção
-   ortográfica e em vista axial (câmera alinhada com a linha de ação de `F`)
-3. o código-fonte completo do programa
-
-### Estrutura
-
-| Arquivo | Conteúdo |
-| --- | --- |
-| `momentum/config.py` | leitura e validação da configuração |
-| `momentum/campo.py` | geometria e cálculo do campo de momentos |
-| `momentum/desenho.py` | construção das figuras com Matplotlib |
-| `momentum/relatorio.py` | montagem do PDF com ReportLab |
-| `momentum/__main__.py` | linha de comando |
-| `config.toml` | parâmetros da simulação e da visualização |
-
-### Instalação
+## Instalação
 
 As dependências são gerenciadas com [uv](https://docs.astral.sh/uv/):
 
@@ -59,39 +63,47 @@ As dependências são gerenciadas com [uv](https://docs.astral.sh/uv/):
 uv sync
 ```
 
-Alternativamente, com `pip` e o `requirements.txt` (gerado a partir do `uv`):
+Alternativamente, com `pip` e o `requirements.txt` gerado por `uv export`:
 
 ```sh
-python -m venv .venv && . .venv/bin/activate
+python -m venv .venv
+. .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Uso
+## Uso
 
 ```sh
-uv run momentum                       # gera saida/momentum.pdf
-uv run momentum --config outro.toml   # usa outra configuração
-uv run momentum --saida relatorio.pdf # escolhe o arquivo de saída
+uv run momentum
+uv run momentum tarefa1
+uv run momentum tarefa2
+uv run momentum tarefa1 --config outro.toml --saida relatorio.pdf
+uv run momentum tarefa2 -c outro.toml -s relatorio.pdf
 ```
 
-Sem o `uv`, com o ambiente virtual ativado, use `python -m momentum` com as
-mesmas opções.
+Sem subcomando, são gerados `saida/tarefa_1.pdf` e `saida/tarefa_2.pdf`.
+Com apenas um subcomando, é gerado o PDF da tarefa escolhida. Sem o `uv`, com
+o ambiente virtual ativado, use `python -m momentum` da mesma forma.
 
-### Configuração
+## Configuração
 
-Todos os parâmetros ficam em `config.toml`: a força, o ponto de aplicação, a
-quantidade e o espaçamento dos planos, os raios e o passo angular das direções,
-as escalas de desenho, as cores e a lista de vistas. Editar esse arquivo é
-suficiente para alterar a visualização, sem nenhuma mudança no código.
+Todos os parâmetros que alteram cálculos ou visualizações estão nos arquivos
+TOML. Um caminho fornecido com `--config` deve existir. Se o arquivo padrão não
+existir, o programa usa os valores embutidos nos módulos de configuração.
 
-### Automação
+Na Tarefa 2, cada bloco `[[casos]]` contém as forças `forcas`, seus pontos de
+aplicação `pontos`, os polos `polo_q` e `polo_a` e o versor `versor_u`. O
+programa normaliza `versor_u`, verifica as dimensões de todos os vetores e
+confere as identidades de transporte do momento, invariância escalar e momento
+mínimo antes de gerar o PDF.
+
+## Automação
 
 O fluxo em [.github/workflows/momentum.yml](.github/workflows/momentum.yml)
-roda a cada push na branch `main` e também sob demanda pelo botão de execução
-manual do GitHub Actions. Ele instala as dependências, executa o programa e
-guarda o PDF como artefato da execução. Quando a versão declarada no
-`pyproject.toml` ainda não tem release, o fluxo cria a tag `vX.Y.Z` e publica
-uma release com o código-fonte e o PDF gerado.
+executa o programa a cada push na branch `main` e também sob demanda. Os dois
+PDFs são guardados como artefatos. Quando a versão declarada no
+`pyproject.toml` ainda não tem uma release, o fluxo publica uma release com o
+código-fonte e os dois relatórios.
 
 ## Licença
 
