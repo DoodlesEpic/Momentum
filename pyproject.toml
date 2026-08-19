@@ -1,6 +1,6 @@
 [project]
 name = "momentum"
-version = "2.1.3"
+version = "2.1.4"
 description = "Programas das tarefas optativas de PME0100 Mecânica I"
 readme = "README.md"
 requires-python = ">=3.11"
