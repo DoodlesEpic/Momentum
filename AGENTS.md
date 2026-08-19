@@ -68,3 +68,10 @@ O fluxo do GitHub Actions em
 [.github/workflows/momentum.yml](.github/workflows/momentum.yml) executa o
 programa a cada push na `main`, guarda o PDF como artefato e publica uma release
 com o código e o PDF sempre que a versão do `pyproject.toml` muda.
+
+## Releases
+
+Sempre que uma nova release for publicada no GitHub, use a CLI `gh` para editar
+as notas de lançamento da tag correspondente, resumindo em português do Brasil as
+principais novidades, melhorias ou correções da versão.
+
