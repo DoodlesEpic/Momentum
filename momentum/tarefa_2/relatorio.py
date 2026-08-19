@@ -40,6 +40,15 @@ def _tabela_resumo(reducoes: list[Reducao]):
     )
 
 
+def _descricoes_dos_casos(reducoes: list[Reducao], estilos: dict) -> list:
+    """Parágrafos com a descrição de cada caso na página de cobertura."""
+    elementos = []
+    for reducao in reducoes:
+        texto = f"<b>{reducao.caso.nome}</b>: {reducao.caso.descricao}"
+        elementos.append(Paragraph(texto, estilos["texto"]))
+    return elementos
+
+
 def _tabelas_de_entrada(reducao: Reducao) -> list:
     """Tabela de forças e pontos, seguida dos polos e do versor do eixo."""
     caso = reducao.caso
@@ -136,6 +145,9 @@ def gerar_pdf(
         ),
         Spacer(1, 0.25 * cm),
         _tabela_resumo(reducoes),
+        Spacer(1, 0.35 * cm),
+        Paragraph("Descrição dos exemplos", estilos["secao"]),
+        *_descricoes_dos_casos(reducoes, estilos),
         PageBreak(),
     ]
     numero_da_figura = 1
