@@ -45,7 +45,7 @@ def _descricoes_dos_casos(reducoes: list[Reducao], estilos: dict) -> list:
     elementos = []
     for reducao in reducoes:
         texto = f"<b>{reducao.caso.nome}</b>: {reducao.caso.descricao}"
-        elementos.append(Paragraph(texto, estilos["texto"]))
+        elementos.append(Paragraph(texto, estilos["texto"], bulletText="•"))
     return elementos
 
 
