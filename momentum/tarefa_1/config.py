@@ -49,7 +49,7 @@ class Config:
                 "descricao": "Câmera em perspectiva sobre a diagonal do primeiro octante.",
                 "projecao": "persp",
                 "elevacao": 35.264,
-                "azimute": 45.0,
+                "azimute": -45.0,
             },
             {
                 "nome": "Projeção ortográfica",
