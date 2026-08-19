@@ -35,7 +35,7 @@ nome = "Perspectiva isométrica"
 descricao = "Câmera em perspectiva sobre a diagonal do primeiro octante (elevação de 35,264°)."
 projecao = "persp"
 elevacao = 35.264
-azimute = 45.0
+azimute = -45.0
 
 [[vistas]]
 nome = "Projeção ortográfica"
