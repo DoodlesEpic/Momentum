@@ -26,10 +26,10 @@ Decisões:
 | Linha de comando | subcomando `tarefa5`, e sem subcomando o programa gera as três tarefas |
 | Saídas | um PDF com as duas partes e um vídeo MP4 do item 1.2, anexado ao PDF com o `pypdf` |
 | Vídeo | `FFMpegWriter` do matplotlib, com o ffmpeg do pacote `imageio-ffmpeg` |
-| Animação no PDF | um botão de formulário por quadro e um JavaScript que mostra um de cada vez, com o primeiro quadro como imagem estática nos leitores sem JavaScript |
+| Animação no PDF | um botão de formulário por quadro e um JavaScript que mostra um de cada vez, empilhando os quadros para o Edge não piscar, com o primeiro quadro como imagem estática nos leitores sem JavaScript |
 | Fórmulas no PDF | notação do LaTeX desenhada pelo mathtext do matplotlib, no meio do texto ou em destaque |
 | Números no PDF | no máximo três casas decimais |
-| Créditos | o PDF da Tarefa 5 não credita o Claude, como o professor indicou |
+| Créditos | o PDF da Tarefa 5 não cita o Momentum, a licença GPL nem o Claude, como o professor indicou |
 | Ângulos na configuração | em graus, convertidos para radianos na leitura |
 | Exemplo padrão | `R = 3r`, o mesmo do exemplo 17 do capítulo 3 das notas de aula |
 | Notação | a das notas de aula: `v = v τ`, `a = a_τ τ + a_n n`, `b = τ ∧ n` |

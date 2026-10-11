@@ -111,9 +111,11 @@ Sem subcomando, são gerados `saida/tarefa_1.pdf`, `saida/tarefa_2.pdf`,
 grava o vídeo vem do pacote imageio-ffmpeg.
 
 No PDF da Tarefa 5, a animação fica na Figura 2. Cada quadro é um botão de
-formulário com a imagem do quadro, e um JavaScript do PDF mostra um de cada vez.
-Ela roda no Google Chrome e no Adobe Acrobat Reader. Leitores sem JavaScript
-mostram o primeiro quadro. O vídeo MP4 também vai anexado ao PDF.
+formulário com a imagem do quadro, e um JavaScript do PDF mostra um de cada vez,
+sempre por cima dos anteriores. Ela roda no Google Chrome, no Microsoft Edge e no
+Adobe Acrobat Reader. Leitores sem JavaScript mostram o primeiro quadro. O vídeo
+MP4 também vai anexado ao PDF. O PDF da Tarefa 5 é a entrega ao professor e não
+cita o Momentum, a licença nem o Claude.
 
 As fórmulas do relatório são escritas na notação do LaTeX e desenhadas pelo
 mathtext do matplotlib, com a mesma família de fonte do texto. As fórmulas curtas

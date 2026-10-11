@@ -86,8 +86,12 @@ notação seguem o capítulo 3 das notas de aula.
   ortográfica e uma terceira de outra maneira, hoje a vista axial alinhada com a
   linha de ação da força.
 - O PDF credita Eduardo Lima Moraes, ID USP 16802140. Os PDFs das tarefas 1 e 2
-  também creditam o Claude, mas a partir da tarefa 5 o professor dispensou esse
-  crédito, e ele não deve aparecer nas entregas novas.
+  também citam o Momentum, a licença GPL e o Claude. A partir da tarefa 5 a
+  entrega é feita para o professor sem nada disso, nem no título, no rodapé, nos
+  metadados ou nos cabeçalhos dos arquivos listados.
+- Na animação dentro do PDF, cada quadro novo aparece por cima dos anteriores, e
+  os quadros só são escondidos ao recomeçar a volta. Esconder um quadro a cada
+  troca faz o leitor nativo do Edge piscar.
 - Os números no PDF têm no máximo três casas decimais, para ficarem legíveis.
 - Fórmulas no PDF são escritas na notação do LaTeX e desenhadas com o mathtext do
   matplotlib, nunca como texto comum. As curtas ficam no meio do texto e as longas
