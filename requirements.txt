@@ -10,6 +10,8 @@ cycler==0.12.1
     # via matplotlib
 fonttools==4.66.1
     # via matplotlib
+imageio-ffmpeg==0.6.0
+    # via momentum
 kiwisolver==1.5.1
     # via matplotlib
 matplotlib==3.11.2
@@ -34,6 +36,8 @@ pygments==2.21.0
     # via momentum
 pyparsing==3.3.3
     # via matplotlib
+pypdf==6.20.0
+    # via momentum
 python-dateutil==2.9.0.post0
     # via matplotlib
 reportlab==5.0.1

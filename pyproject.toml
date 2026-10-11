@@ -8,9 +8,11 @@ license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [{ name = "Eduardo Lima Moraes" }]
 dependencies = [
+    "imageio-ffmpeg>=0.6",
     "matplotlib>=3.11",
     "numpy>=2.4",
     "pygments>=2.21",
+    "pypdf>=6.20",
     "reportlab>=5.0",
 ]
 
