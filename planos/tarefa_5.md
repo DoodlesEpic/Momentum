@@ -187,7 +187,7 @@ uv run momentum
 
 ## Commits
 
-Um commit por arquivo criado ou alterado, conventional commits sem escopo e sem
-`Co-authored-by`. Ordem: `docs:` do enunciado e do plano, `feat:` de cada módulo
+Um commit por mudança coerente, conventional commits sem escopo e sem
+`Co-authored-by`. Ordem: `docs:` do enunciado e do plano, `feat:` dos módulos
 de `tarefa_5/` e da configuração, `feat:` da linha de comando, `ci:` do
 workflow, `docs:` do README e do AGENTS.md e `build:` da versão e do lockfile.

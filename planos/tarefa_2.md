@@ -331,8 +331,8 @@ apareça na execução em vez de virar número errado na tabela.
 
 ## Commits
 
-Seguindo o AGENTS.md, um commit por arquivo criado ou alterado, conventional
-commits sem escopo e sem `Co-authored-by`. Ordem sugerida:
+Seguindo o AGENTS.md, um commit por mudança coerente, conventional commits sem
+escopo e sem `Co-authored-by`. Ordem sugerida:
 
 Etapa A: `refactor:` para cada módulo movido para `comum/` e para `tarefa_1/`,
 depois `refactor:` da linha de comando, `build:` da renomeação do TOML e

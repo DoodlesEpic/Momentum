@@ -54,10 +54,17 @@ notação seguem o capítulo 3 das notas de aula.
 
 ## Commits
 
-- Um commit para cada arquivo criado ou alteração realizada, feitos ao longo do
-  trabalho e não todos no final.
-- Conventional commits sem escopo entre parênteses, por exemplo
-  `feat: adiciona leitura da configuração em TOML`.
+- Commits feitos ao longo do trabalho e não todos no final. Cada commit reúne
+  uma mudança coerente, como um módulo novo com a sua configuração ou a troca
+  de versão no `pyproject.toml`, no pacote e no lockfile. O histórico deve ter no
+  máximo uns 30 commits por tarefa.
+- Conventional commits sem escopo entre parênteses, em português com acentos e
+  com o verbo no presente, por exemplo
+  `feat: adiciona leitura da configuração em TOML`. Quando o commit reúne várias
+  alterações, o corpo da mensagem lista cada uma em uma linha começando com hífen.
+- Ao reorganizar o histórico, junte apenas commits vizinhos, mantenha a data de
+  autoria do primeiro commit de cada grupo e a data de commit do último, e mova
+  as tags das versões para os commits novos equivalentes.
 - Nada de `Co-authored-by`, `Signed-off-by`, `Generated with` ou qualquer outra
   linha de créditos ou atribuição a ferramentas nas mensagens de commit. Os
   créditos ficam no README e, nas tarefas 1 e 2, no PDF.
