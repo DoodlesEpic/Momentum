@@ -9,6 +9,7 @@ import textwrap
 from pathlib import Path
 from xml.sax.saxutils import escape
 
+import matplotlib
 import numpy as np
 from matplotlib.figure import Figure
 from pygments import lex
@@ -16,9 +17,12 @@ from pygments.lexers import get_lexer_for_filename
 from pygments.styles import get_style_by_name
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.fonts import addMapping
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     CondPageBreak,
     Image,
@@ -38,6 +42,27 @@ ID_USP = "16802140"
 DISCIPLINA = "PME0100 - Mecânica I (2026)"
 LARGURA_CODIGO = 110
 ESTILO_CODIGO = "friendly"
+FONTE_UNICODE = "DejaVuSans"
+FONTE_CODIGO = "DejaVuSansMono"
+
+
+def _registrar_fontes() -> None:
+    """Registra a DejaVu, que vem com o matplotlib e tem as letras gregas
+    que faltam nas fontes padrão do PDF."""
+    pasta = Path(matplotlib.get_data_path()) / "fonts" / "ttf"
+    for variante, negrito, italico in (
+        ("", 0, 0),
+        ("-Bold", 1, 0),
+        ("-Oblique", 0, 1),
+        ("-BoldOblique", 1, 1),
+    ):
+        nome = FONTE_UNICODE + variante
+        pdfmetrics.registerFont(TTFont(nome, pasta / f"{nome}.ttf"))
+        addMapping(FONTE_UNICODE, negrito, italico, nome)
+    pdfmetrics.registerFont(TTFont(FONTE_CODIGO, pasta / f"{FONTE_CODIGO}.ttf"))
+
+
+_registrar_fontes()
 
 
 def estilos() -> dict:
@@ -63,7 +88,7 @@ def estilos() -> dict:
             "legenda", parent=base["Normal"], fontSize=9, leading=12, alignment=TA_CENTER
         ),
         "codigo": ParagraphStyle(
-            "codigo", parent=base["Code"], fontName="Courier", fontSize=7.2, leading=8.6
+            "codigo", parent=base["Code"], fontName=FONTE_CODIGO, fontSize=7.2, leading=8.6
         ),
     }
 
