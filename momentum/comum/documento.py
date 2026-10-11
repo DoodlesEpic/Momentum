@@ -15,6 +15,7 @@ from matplotlib.figure import Figure
 from pygments import lex
 from pygments.lexers import get_lexer_for_filename
 from pygments.styles import get_style_by_name
+from pypdf import PdfWriter
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.fonts import addMapping
@@ -46,9 +47,9 @@ FONTE_UNICODE = "DejaVuSans"
 FONTE_CODIGO = "DejaVuSansMono"
 
 
+# Registra a fonte DejaVu, que vem com o matplotlib, porque as fontes padrão do PDF não têm
+# letras gregas. As quatro variantes permitem usar <b> e <i> nos textos.
 def _registrar_fontes() -> None:
-    """Registra a DejaVu, que vem com o matplotlib e tem as letras gregas
-    que faltam nas fontes padrão do PDF."""
     pasta = Path(matplotlib.get_data_path()) / "fonts" / "ttf"
     for variante, negrito, italico in (
         ("", 0, 0),
@@ -65,27 +66,55 @@ def _registrar_fontes() -> None:
 _registrar_fontes()
 
 
+# Estilos de texto comuns aos relatórios. Todos usam a DejaVu, menos o código, que usa
+# a versão monoespaçada dela.
 def estilos() -> dict:
-    """Estilos tipográficos comuns aos relatórios."""
     base = getSampleStyleSheet()
+    negrito = FONTE_UNICODE + "-Bold"
     return {
         "titulo": ParagraphStyle(
-            "titulo", parent=base["Title"], fontSize=26, leading=30, spaceAfter=6
+            "titulo", parent=base["Title"], fontName=negrito, fontSize=26, leading=30, spaceAfter=6
         ),
         "subtitulo": ParagraphStyle(
-            "subtitulo", parent=base["Normal"], fontSize=13, leading=18, alignment=TA_CENTER
+            "subtitulo",
+            parent=base["Normal"],
+            fontName=FONTE_UNICODE,
+            fontSize=13,
+            leading=18,
+            alignment=TA_CENTER,
         ),
         "secao": ParagraphStyle(
-            "secao", parent=base["Heading2"], fontSize=13, leading=16, spaceBefore=10, spaceAfter=6
+            "secao",
+            parent=base["Heading2"],
+            fontName=negrito,
+            fontSize=13,
+            leading=16,
+            spaceBefore=10,
+            spaceAfter=6,
         ),
         "texto": ParagraphStyle(
-            "texto", parent=base["Normal"], fontSize=10, leading=14, spaceAfter=3
+            "texto",
+            parent=base["Normal"],
+            fontName=FONTE_UNICODE,
+            fontSize=10,
+            leading=14,
+            spaceAfter=3,
         ),
         "arquivo": ParagraphStyle(
-            "arquivo", parent=base["Normal"], fontSize=10, leading=14, spaceAfter=6
+            "arquivo",
+            parent=base["Normal"],
+            fontName=FONTE_UNICODE,
+            fontSize=10,
+            leading=14,
+            spaceAfter=6,
         ),
         "legenda": ParagraphStyle(
-            "legenda", parent=base["Normal"], fontSize=9, leading=12, alignment=TA_CENTER
+            "legenda",
+            parent=base["Normal"],
+            fontName=FONTE_UNICODE,
+            fontSize=9,
+            leading=12,
+            alignment=TA_CENTER,
         ),
         "codigo": ParagraphStyle(
             "codigo", parent=base["Code"], fontName=FONTE_CODIGO, fontSize=7.2, leading=8.6
@@ -93,19 +122,21 @@ def estilos() -> dict:
     }
 
 
+# Escreve um vetor como (x, y, z) com até seis algarismos significativos.
 def vetor(v: np.ndarray) -> str:
-    """Representação compacta de um vetor para o relatório."""
     return "(" + ", ".join(f"{c:.6g}" for c in np.asarray(v)) + ")"
 
 
+# Página de rosto com título, autor, parâmetros, explicação e créditos. A partir da
+# Tarefa 5 o professor dispensou o crédito ao Claude, que então pode ser omitido.
 def capa(
     subtitulo: str,
     tarefa: str,
     parametros: list[str],
     explicacao: str,
     estilos_do_documento: dict,
+    credito_ao_claude: bool = True,
 ) -> list:
-    """Página de rosto com parâmetros, explicação e créditos."""
     conteudo = [
         Spacer(1, 3 * cm),
         Paragraph("Momentum", estilos_do_documento["titulo"]),
@@ -127,9 +158,13 @@ def capa(
         Paragraph(explicacao, estilos_do_documento["texto"]),
         Paragraph("Créditos", estilos_do_documento["secao"]),
         Paragraph(
-            f"Programa e figuras por {AUTOR} (ID USP {ID_USP}), com auxílio do "
-            "<b>Claude</b> (Anthropic) na escrita do código. "
-            f"Momentum {__version__}, distribuído sob a licença GNU GPL v3 ou posterior.",
+            f"Programa e figuras por {AUTOR} (ID USP {ID_USP})"
+            + (
+                ", com auxílio do <b>Claude</b> (Anthropic) na escrita do código"
+                if credito_ao_claude
+                else ""
+            )
+            + f". Momentum {__version__}, distribuído sob a licença GNU GPL v3 ou posterior.",
             estilos_do_documento["texto"],
         ),
         PageBreak(),
@@ -137,10 +172,10 @@ def capa(
     return conteudo
 
 
+# Página com o título, a figura do matplotlib convertida em imagem PNG e a legenda.
 def pagina_de_figura(
     figura: Figure, titulo: str, texto_da_legenda: str, dpi: int, estilos_do_documento: dict
 ) -> list:
-    """Cria uma página do documento para uma figura e sua legenda."""
     buffer = io.BytesIO()
     figura.savefig(buffer, format="png", dpi=dpi)
     buffer.seek(0)
@@ -156,13 +191,15 @@ def pagina_de_figura(
     ]
 
 
+# Tabela com cabeçalho cinza e grade fina. A primeira coluna fica à esquerda e as demais,
+# numéricas, à direita.
 def tabela(cabecalho: list[str], linhas: list[list[str]], larguras: list[float]) -> Table:
-    """Monta uma tabela numérica legível em uma página A4."""
     dados = [cabecalho] + linhas
     resultado = Table(dados, colWidths=larguras, repeatRows=1, hAlign="LEFT")
     estilo = [
         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#e6e6e6")),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, 0), (-1, -1), FONTE_UNICODE),
+        ("FONTNAME", (0, 0), (-1, 0), FONTE_UNICODE + "-Bold"),
         ("FONTSIZE", (0, 0), (-1, -1), 8),
         ("LEADING", (0, 0), (-1, -1), 10),
         ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#b0b0b0")),
@@ -179,8 +216,8 @@ def tabela(cabecalho: list[str], linhas: list[list[str]], larguras: list[float])
     return resultado
 
 
+# Colore o código-fonte com o pygments e quebra as linhas longas para caberem na página.
 def codigo_colorido(fonte: str, nome: str) -> str:
-    """Converte código em marcação colorida para o ReportLab."""
     estilo = get_style_by_name(ESTILO_CODIGO)
     linhas = []
     for linha in fonte.expandtabs(4).splitlines():
@@ -200,8 +237,8 @@ def codigo_colorido(fonte: str, nome: str) -> str:
     return "".join(partes)
 
 
+# Páginas finais com a listagem colorida de cada arquivo que gerou o documento.
 def paginas_do_codigo(arquivos: list[Path], estilos_do_documento: dict) -> list:
-    """Anexa a listagem de todos os arquivos que geraram o documento."""
     conteudo = [
         Paragraph("Código-fonte", estilos_do_documento["secao"]),
         Paragraph(
@@ -221,12 +258,12 @@ def paginas_do_codigo(arquivos: list[Path], estilos_do_documento: dict) -> list:
     return conteudo
 
 
+# Cria a função que o ReportLab chama em cada página para escrever o rodapé com a tarefa,
+# o autor e o número da página.
 def rodape_de(tarefa: str):
-    """Devolve o callback que desenha o rodapé do relatório."""
-
     def rodape(canvas, documento) -> None:
         canvas.saveState()
-        canvas.setFont("Helvetica", 8)
+        canvas.setFont(FONTE_UNICODE, 8)
         canvas.setFillGray(0.4)
         canvas.drawString(2 * cm, 1.2 * cm, f"Momentum, {tarefa}, {AUTOR} ({ID_USP})")
         canvas.drawRightString(A4[0] - 2 * cm, 1.2 * cm, str(documento.page))
@@ -235,8 +272,8 @@ def rodape_de(tarefa: str):
     return rodape
 
 
+# Grava o PDF em A4 com o conteúdo da tarefa, seguido da listagem do código-fonte.
 def gerar_pdf(tarefa: str, conteudo: list, arquivos: list[Path], caminho: str | Path) -> Path:
-    """Grava o conteúdo e o código-fonte em um relatório PDF."""
     caminho = Path(caminho)
     caminho.parent.mkdir(parents=True, exist_ok=True)
     documento = SimpleDocTemplate(
@@ -254,3 +291,12 @@ def gerar_pdf(tarefa: str, conteudo: list, arquivos: list[Path], caminho: str | 
     rodape = rodape_de(tarefa)
     documento.build(todo_o_conteudo, onFirstPage=rodape, onLaterPages=rodape)
     return caminho
+
+
+# Anexa um arquivo, como o vídeo da Tarefa 5, a um PDF já gravado. O anexo aparece no
+# painel de anexos, o ícone de clipe, de leitores como o Acrobat e o Firefox.
+def anexar(caminho_pdf: str | Path, arquivo: str | Path) -> None:
+    arquivo = Path(arquivo)
+    escritor = PdfWriter(clone_from=caminho_pdf)
+    escritor.add_attachment(arquivo.name, arquivo.read_bytes())
+    escritor.write(caminho_pdf)

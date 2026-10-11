@@ -1,7 +1,7 @@
 # Configuração da Tarefa Optativa 5.
 
 saida_pdf = "saida/tarefa_5.pdf"
-saida_animacao = "saida/tarefa_5_hipocicloide.gif"
+saida_animacao = "saida/tarefa_5_hipocicloide.mp4"
 dpi = 200
 
 # Parte 1. Todos os ângulos θ estão em graus. R = 3r é o exemplo do capítulo 3.
@@ -17,8 +17,8 @@ posicoes_versores = [20.0, 60.0, 100.0, 140.0, 180.0, 220.0, 260.0, 300.0, 340.0
 omega = 0.05235987755982988
 instantes = [10.0, 20.0, 35.0]
 pontos_da_curva = 2000
-quadros = 120
-quadros_por_segundo = 20
+quadros = 180
+quadros_por_segundo = 30
 dpi_animacao = 100
 # Fração de R ocupada pelo maior vetor desenhado
 escala_velocidade = 0.4

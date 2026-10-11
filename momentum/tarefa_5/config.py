@@ -27,10 +27,10 @@ CORES_PADRAO = {
 }
 
 
+# Parte 1: disco de raio r rolando dentro de um aro de raio R. Os ângulos θ vêm em graus
+# no TOML e são convertidos para radianos, a unidade que o numpy usa.
 @dataclass
 class Hipocicloide:
-    """Disco de raio r rolando dentro de um aro de raio R. Ângulos em graus."""
-
     raio_aro: float = 3.0
     raio_disco: float = 1.0
     razoes: tuple = (3.0, 4.0, 6.0, 2.5)
@@ -41,12 +41,13 @@ class Hipocicloide:
     omega: float = math.pi / 60
     instantes: tuple = (10.0, 20.0, 35.0)
     pontos_da_curva: int = 2000
-    quadros: int = 120
-    quadros_por_segundo: int = 20
+    quadros: int = 180
+    quadros_por_segundo: int = 30
     dpi_animacao: int = 100
     escala_velocidade: float = 0.4
     escala_aceleracao: float = 0.4
 
+    # Converte os ângulos e recusa raios que não formam uma hipociclóide com curvatura finita.
     def __post_init__(self) -> None:
         self.instantaneos = np.radians(self.instantaneos)
         self.posicoes_curvatura = np.radians(self.posicoes_curvatura)
@@ -61,27 +62,26 @@ class Hipocicloide:
             raise ValueError("as razões R/r devem ser maiores que 1")
 
 
+# Parte 2: trecho desenhado da curva (λ, λ², λ³) e os três valores de λ analisados.
 @dataclass
 class Cubica:
-    """Trecho desenhado da curva e os três pontos do triedro de Frenet."""
-
     lambda_minimo: float = -1.3
     lambda_maximo: float = 1.3
     parametros: tuple = (-1.0, 0.5, 1.2)
     comprimento_versores: float = 0.75
     pontos_da_curva: int = 400
 
+    # Recusa λ = 0, que o enunciado exclui.
     def __post_init__(self) -> None:
         if 0.0 in self.parametros:
             raise ValueError("o enunciado pede λ diferente de zero")
 
 
+# Configuração completa: arquivos de saída, as duas partes, as cores e a vista 3D da parte 2.
 @dataclass
 class Config:
-    """Configuração completa do relatório da Tarefa 5."""
-
     saida_pdf: str = "saida/tarefa_5.pdf"
-    saida_animacao: str = "saida/tarefa_5_hipocicloide.gif"
+    saida_animacao: str = "saida/tarefa_5_hipocicloide.mp4"
     dpi: int = 200
     hipocicloide: Hipocicloide | dict = field(default_factory=Hipocicloide)
     cubica: Cubica | dict = field(default_factory=Cubica)
@@ -95,6 +95,7 @@ class Config:
         }
     )
 
+    # Transforma as tabelas lidas do TOML nas classes acima e completa as cores que faltarem.
     def __post_init__(self) -> None:
         if isinstance(self.hipocicloide, dict):
             self.hipocicloide = Hipocicloide(**self.hipocicloide)
@@ -105,8 +106,8 @@ class Config:
         self.cores = CORES_PADRAO | self.cores
 
 
+# Lê o arquivo TOML. Os campos que não estiverem nele ficam com os valores padrão acima.
 def carregar(caminho: str | Path | None = None) -> Config:
-    """Lê o TOML, completando os campos omitidos com os padrões."""
     dados: dict = {}
     if caminho is not None:
         arquivo = Path(caminho)

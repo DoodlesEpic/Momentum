@@ -7,8 +7,10 @@
 from fractions import Fraction
 from pathlib import Path
 
+import imageio_ffmpeg
+import matplotlib
 import numpy as np
-from matplotlib.animation import PillowWriter
+from matplotlib.animation import FFMpegWriter
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 
@@ -16,22 +18,28 @@ from ..comum import cena
 from . import cubica, hipocicloide
 from .config import Config
 
+# O pacote imageio-ffmpeg traz o programa ffmpeg, que o matplotlib usa para gravar o MP4.
+matplotlib.rcParams["animation.ffmpeg_path"] = imageio_ffmpeg.get_ffmpeg_exe()
 
+
+# Pontos de uma circunferência de centro e raio dados. Servem para o aro, o disco e os
+# círculos osculadores.
 def _circulo(centro: np.ndarray, raio: float) -> np.ndarray:
     angulos = np.linspace(0.0, 2 * np.pi, 181)
     return centro + raio * np.column_stack([np.cos(angulos), np.sin(angulos)])
 
 
+# Valores de θ e pontos da hipociclóide de raios R e r, desde θ = 0 até a curva fechar.
 def _curva(cfg: Config, R: float, r: float) -> tuple[np.ndarray, np.ndarray]:
-    """Valores de θ e pontos da curva completa, até ela fechar."""
     h = cfg.hipocicloide
     voltas = hipocicloide.voltas(R / r, h.voltas_maximas)
     thetas = np.linspace(0.0, 2 * np.pi * voltas, h.pontos_da_curva * voltas)
     return thetas, hipocicloide.posicao(R, r, thetas)
 
 
+# Desenha o aro e ajusta os eixos com a mesma escala em x e y, para a curva não ficar
+# achatada.
 def _plano(eixos, cfg: Config, titulo: str, limite: float | None = None) -> None:
-    """Desenha o aro e ajusta os eixos com a mesma escala em x e y."""
     R = cfg.hipocicloide.raio_aro
     limite = limite or 1.12 * R
     eixos.plot(*_circulo(np.zeros(2), R).T, color=cfg.cores["aro"], lw=1.4)
@@ -43,17 +51,22 @@ def _plano(eixos, cfg: Config, titulo: str, limite: float | None = None) -> None
     eixos.set_title(titulo, fontsize=10)
 
 
+# Legenda com uma linha colorida para cada par (cor, rótulo).
 def _legenda(eixos, itens: list[tuple[str, str]]) -> None:
     marcas = [Line2D([], [], color=cor, lw=2, label=rotulo) for cor, rotulo in itens]
     eixos.legend(handles=marcas, loc="upper right", fontsize=7, framealpha=0.9)
 
 
+# Seta plana que sai de origem. Usa só as componentes x e y, porque na parte 1 z = 0.
 def _seta(eixos, origem: np.ndarray, vetor: np.ndarray, cor: str) -> None:
-    eixos.quiver(*origem, *vetor, color=cor, angles="xy", scale_units="xy", scale=1, width=0.006)
+    eixos.quiver(
+        *origem, *vetor[:2], color=cor, angles="xy", scale_units="xy", scale=1, width=0.006
+    )
 
 
+# Um quadro da geração da curva no ângulo θ: o aro, o disco com centro C, o raio CP,
+# o ponto de contato T e o traço deixado por P até θ.
 def desenhar_rolamento(eixos, cfg: Config, theta: float) -> None:
-    """Um quadro da geração: aro, disco, raio CP, contato T e traço de P até θ."""
     h = cfg.hipocicloide
     R, r = h.raio_aro, h.raio_disco
     cores = cfg.cores
@@ -73,8 +86,8 @@ def desenhar_rolamento(eixos, cfg: Config, theta: float) -> None:
     eixos.text(*(P + 0.06 * R), "P", fontsize=9)
 
 
+# Item 1.1: a hipociclóide completa dentro do aro, com as cúspides marcadas.
 def figura_curva(cfg: Config) -> Figure:
-    """Item 1.1: a hipociclóide completa dentro do aro."""
     h = cfg.hipocicloide
     R, r = h.raio_aro, h.raio_disco
     figura = Figure(figsize=(6.4, 6.4))
@@ -95,8 +108,8 @@ def figura_curva(cfg: Config) -> Figure:
     return figura
 
 
+# Item 1.3: seis quadros da geração, desenhados pela mesma função usada na animação.
 def figura_instantaneos(cfg: Config) -> Figure:
-    """Item 1.3: seis quadros do processo de geração."""
     figura = Figure(figsize=(9.6, 6.6))
     for eixos, theta in zip(figura.subplots(2, 3).flat, cfg.hipocicloide.instantaneos):
         desenhar_rolamento(eixos, cfg, theta)
@@ -104,8 +117,8 @@ def figura_instantaneos(cfg: Config) -> Figure:
     return figura
 
 
+# Item 1.4: uma hipociclóide para cada razão R/r, mantendo R e calculando r = R / (R/r).
 def figura_razoes(cfg: Config) -> Figure:
-    """Item 1.4: hipociclóides para quatro razões R/r."""
     h = cfg.hipocicloide
     figura = Figure(figsize=(8.0, 8.0))
     for eixos, razao in zip(figura.subplots(2, 2).flat, h.razoes):
@@ -118,8 +131,9 @@ def figura_razoes(cfg: Config) -> Figure:
     return figura
 
 
+# Item 1.5: em cada ponto escolhido, o círculo osculador, de raio ρ e centro no centro de
+# curvatura. É o círculo que melhor acompanha a curva naquele ponto.
 def figura_curvatura(cfg: Config, curvaturas: list[hipocicloide.Curvatura]) -> Figure:
-    """Item 1.5: círculos osculadores e centros de curvatura."""
     h = cfg.hipocicloide
     cor = cfg.cores["curvatura"]
     figura = Figure(figsize=(6.4, 6.4))
@@ -138,8 +152,8 @@ def figura_curvatura(cfg: Config, curvaturas: list[hipocicloide.Curvatura]) -> F
     return figura
 
 
+# Item 1.6: setas dos versores τ e n nos pontos escolhidos, todas com o mesmo comprimento.
 def figura_versores(cfg: Config, curvaturas: list[hipocicloide.Curvatura]) -> Figure:
-    """Item 1.6: versores tangente e normal principal ao longo da curva."""
     h = cfg.hipocicloide
     cores = cfg.cores
     comprimento = 0.25 * h.raio_aro
@@ -156,24 +170,25 @@ def figura_versores(cfg: Config, curvaturas: list[hipocicloide.Curvatura]) -> Fi
     return figura
 
 
+# Fatores de escala das setas de v e a. Fazem o maior vetor de cada tipo ocupar a fração
+# de R pedida no TOML, já que v e a não são distâncias e não caberiam na figura.
 def escalas_cinematica(
     cfg: Config, cinematicas: list[hipocicloide.Cinematica]
 ) -> tuple[float, float]:
-    """Fatores que levam o maior v e o maior a a uma fração de R na figura."""
     h = cfg.hipocicloide
     maior_v = max(np.linalg.norm(item.velocidade) for item in cinematicas)
     maior_a = max(np.linalg.norm(item.aceleracao) for item in cinematicas)
     return h.escala_velocidade * h.raio_aro / maior_v, h.escala_aceleracao * h.raio_aro / maior_a
 
 
+# Item 1.7: setas de v e a de P em cada instante, multiplicadas pelos fatores de escala.
 def figura_cinematica(cfg: Config, cinematicas: list[hipocicloide.Cinematica]) -> Figure:
-    """Item 1.7: velocidade e aceleração de P nos instantes escolhidos."""
     h = cfg.hipocicloide
     cores = cfg.cores
     escala_v, escala_a = escalas_cinematica(cfg, cinematicas)
     figura = Figure(figsize=(6.4, 6.4))
     eixos = figura.subplots()
-    _plano(eixos, cfg, f"Velocidade e aceleração com ω = {h.omega:.4g} rad/s")
+    _plano(eixos, cfg, f"Velocidade e aceleração com ω = {h.omega:.3f} rad/s")
     eixos.plot(*_curva(cfg, h.raio_aro, h.raio_disco)[1].T, color=cores["curva"], lw=1.6)
     for item in cinematicas:
         ponto = item.curvatura.ponto
@@ -186,8 +201,8 @@ def figura_cinematica(cfg: Config, cinematicas: list[hipocicloide.Cinematica]) -
     return figura
 
 
+# Itens 2.1 e 2.3: a curva C em 3D e, em cada ponto escolhido, as setas de τ, n e b.
 def figura_cubica(cfg: Config, triedros: list[cubica.Triedro]) -> Figure:
-    """Itens 2.1 e 2.3: a curva e o triedro de Frenet nos pontos escolhidos."""
     c = cfg.cubica
     cores = cfg.cores
     figura, eixos = cena.criar_eixos(cfg.vista)
@@ -216,15 +231,16 @@ def figura_cubica(cfg: Config, triedros: list[cubica.Triedro]) -> Figure:
     return figura
 
 
+# Item 1.2: grava o vídeo MP4 da geração. Desenha um quadro para cada θ entre 0 e o
+# ângulo em que a curva fecha e entrega cada quadro ao ffmpeg.
 def gravar_animacao(cfg: Config) -> Path:
-    """Item 1.2: grava em GIF o disco rolando e o traço de P."""
     h = cfg.hipocicloide
     caminho = Path(cfg.saida_animacao)
     caminho.parent.mkdir(parents=True, exist_ok=True)
     figura = Figure(figsize=(5.0, 5.0))
     eixos = figura.subplots()
     final = 2 * np.pi * hipocicloide.voltas(h.raio_aro / h.raio_disco, h.voltas_maximas)
-    escritor = PillowWriter(fps=h.quadros_por_segundo)
+    escritor = FFMpegWriter(fps=h.quadros_por_segundo)
     with escritor.saving(figura, str(caminho), dpi=h.dpi_animacao):
         for theta in np.linspace(0.0, final, h.quadros):
             eixos.clear()

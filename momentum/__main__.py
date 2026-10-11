@@ -22,6 +22,7 @@ MODULOS_DE_CALCULO = {
 }
 
 
+# Lê a linha de comando. Cada tarefa é um subcomando com as opções --config e --saida.
 def _argumentos() -> argparse.Namespace:
     analisador = argparse.ArgumentParser(
         prog="momentum",
@@ -42,16 +43,17 @@ def _argumentos() -> argparse.Namespace:
     return analisador.parse_args()
 
 
+# Escolhe o TOML da tarefa: o indicado na linha de comando ou o padrão da pasta config.
+# Sem nenhum dos dois, a tarefa usa os valores embutidos no seu config.py.
 def _caminho_config(tarefa: str, argumento: str | None) -> Path | None:
-    """Resolve a configuração explícita ou usa os valores embutidos se faltar o padrão."""
     if argumento is not None:
         return Path(argumento)
     caminho = CONFIGS_PADRAO[tarefa]
     return caminho if caminho.exists() else None
 
 
+# Arquivos de cálculo e de configuração cuja listagem vai para o final do PDF.
 def _arquivos_do_codigo(tarefa: str, caminho_config: Path | None) -> list[Path]:
-    """Fontes essenciais de calculo e configuracao que entram no PDF da tarefa."""
     pacote = Path(__file__).parent
     subpacote = tarefa.replace("tarefa", "tarefa_")
     arquivos = [pacote / "comum" / "vetores.py"]
@@ -61,6 +63,7 @@ def _arquivos_do_codigo(tarefa: str, caminho_config: Path | None) -> list[Path]:
     return arquivos
 
 
+# Tarefa 1: amostra o campo de momentos, desenha as vistas e grava o PDF.
 def _gerar_tarefa_1(configuracao: str | None, caminho_da_saida: str | None) -> None:
     from .tarefa_1 import campo, config, desenho, relatorio
 
@@ -74,6 +77,7 @@ def _gerar_tarefa_1(configuracao: str | None, caminho_da_saida: str | None) -> N
     print(f"PDF gerado em {saida.resolve()}")
 
 
+# Tarefa 2: reduz cada sistema de forças, desenha as figuras e grava o PDF.
 def _gerar_tarefa_2(configuracao: str | None, caminho_da_saida: str | None) -> None:
     from .tarefa_2 import config, desenho, relatorio, sistema
 
@@ -89,6 +93,8 @@ def _gerar_tarefa_2(configuracao: str | None, caminho_da_saida: str | None) -> N
     print(f"PDF gerado em {saida.resolve()}")
 
 
+# Tarefa 5: calcula curvatura, versores e cinemática da hipociclóide e o triedro da
+# curva C, grava o vídeo e depois o PDF, que leva o vídeo anexado.
 def _gerar_tarefa_5(configuracao: str | None, caminho_da_saida: str | None) -> None:
     from .tarefa_5 import config, cubica, desenho, hipocicloide, relatorio
 
@@ -109,6 +115,7 @@ def _gerar_tarefa_5(configuracao: str | None, caminho_da_saida: str | None) -> N
     print(f"PDF gerado em {saida.resolve()}")
 
 
+# Ponto de entrada. Sem subcomando, gera os relatórios de todas as tarefas.
 def main() -> None:
     argumentos = _argumentos()
     if argumentos.tarefa in (None, "tarefa1"):
