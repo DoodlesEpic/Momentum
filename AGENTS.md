@@ -34,7 +34,7 @@ resultados.
 
 Estuda a geometria e a cinemática de curvas. O enunciado está em
 [enunciados/tarefa_5.md](enunciados/tarefa_5.md) e tem duas partes. A primeira
-traça a hipociclóide, grava um vídeo da sua geração de um disco que rola dentro de um aro, mostra
+traça a hipociclóide de um disco que rola dentro de um aro, anima a sua geração, mostra
 instantâneos e quatro razões `R/r`, e calcula o raio de curvatura, os versores
 tangente e normal principal e a velocidade e a aceleração de `P` nas formas
 cartesiana e intrínseca. A segunda calcula o raio de curvatura e o triedro de
@@ -80,7 +80,8 @@ notação seguem o capítulo 3 das notas de aula.
 ## Comportamento do programa
 
 - Cada tarefa gera um PDF com a capa, as figuras e o código-fonte. A tarefa 5
-  também grava o vídeo da hipociclóide em MP4 e o anexa ao PDF.
+  também grava o vídeo da hipociclóide em MP4, anima a geração dentro do PDF com
+  JavaScript e anexa o vídeo ao PDF.
 - Na tarefa 1 são três visualizações, uma perspectiva isométrica, uma projeção
   ortográfica e uma terceira de outra maneira, hoje a vista axial alinhada com a
   linha de ação da força.
@@ -88,6 +89,11 @@ notação seguem o capítulo 3 das notas de aula.
   também creditam o Claude, mas a partir da tarefa 5 o professor dispensou esse
   crédito, e ele não deve aparecer nas entregas novas.
 - Os números no PDF têm no máximo três casas decimais, para ficarem legíveis.
+- Fórmulas no PDF são escritas na notação do LaTeX e desenhadas com o mathtext do
+  matplotlib, nunca como texto comum. As curtas ficam no meio do texto e as longas
+  ou com frações, em destaque e com frações empilhadas. Variáveis em itálico,
+  unidades e funções como sin e cos em fonte normal, vetores com seta como nas
+  notas de aula e fórmulas em destaque sem pontuação nem numeração.
 - Tudo que muda a visualização fica no TOML da tarefa, em `config/`, sem
   precisar editar código.
 - Os relatórios usam a fonte DejaVu, que vem com o matplotlib, porque as fontes

@@ -5,7 +5,7 @@ Computação da Escola Politécnica da USP.
 
 O projeto gera um PDF por tarefa. Cada relatório contém capa, resultados,
 figuras e a listagem do código de cálculo e configuração. A Tarefa 5 também
-gera um vídeo MP4, que também vai anexado ao PDF.
+gera um vídeo MP4, e a animação também roda dentro do próprio PDF.
 
 ## Tarefas
 
@@ -107,9 +107,17 @@ uv run momentum tarefa2 -c outro.toml -s relatorio.pdf
 ```
 
 Sem subcomando, são gerados `saida/tarefa_1.pdf`, `saida/tarefa_2.pdf`,
-`saida/tarefa_5.pdf` e o vídeo `saida/tarefa_5_hipocicloide.mp4`. O vídeo
-fica anexado ao PDF da Tarefa 5 e aparece no painel de anexos de leitores como
-o Acrobat e o Firefox. O ffmpeg que grava o vídeo vem do pacote imageio-ffmpeg.
+`saida/tarefa_5.pdf` e o vídeo `saida/tarefa_5_hipocicloide.mp4`. O ffmpeg que
+grava o vídeo vem do pacote imageio-ffmpeg.
+
+No PDF da Tarefa 5, a animação fica na Figura 2. Cada quadro é um botão de
+formulário com a imagem do quadro, e um JavaScript do PDF mostra um de cada vez.
+Ela roda no Google Chrome e no Adobe Acrobat Reader. Leitores sem JavaScript
+mostram o primeiro quadro. O vídeo MP4 também vai anexado ao PDF.
+
+As fórmulas do relatório são escritas na notação do LaTeX e desenhadas pelo
+mathtext do matplotlib, com a mesma família de fonte do texto. As fórmulas curtas
+ficam no meio do texto e as longas ou com frações ficam em destaque, centralizadas.
 Com apenas um subcomando, é gerado o PDF da tarefa escolhida. Sem o `uv`, com
 o ambiente virtual ativado, use `python -m momentum` da mesma forma.
 

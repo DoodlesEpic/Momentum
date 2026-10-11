@@ -26,6 +26,8 @@ Decisões:
 | Linha de comando | subcomando `tarefa5`, e sem subcomando o programa gera as três tarefas |
 | Saídas | um PDF com as duas partes e um vídeo MP4 do item 1.2, anexado ao PDF com o `pypdf` |
 | Vídeo | `FFMpegWriter` do matplotlib, com o ffmpeg do pacote `imageio-ffmpeg` |
+| Animação no PDF | um botão de formulário por quadro e um JavaScript que mostra um de cada vez, com o primeiro quadro como imagem estática nos leitores sem JavaScript |
+| Fórmulas no PDF | notação do LaTeX desenhada pelo mathtext do matplotlib, no meio do texto ou em destaque |
 | Números no PDF | no máximo três casas decimais |
 | Créditos | o PDF da Tarefa 5 não credita o Claude, como o professor indicou |
 | Ângulos na configuração | em graus, convertidos para radianos na leitura |
@@ -157,7 +159,7 @@ Mesmo padrão das outras tarefas: dataclasses com validação no
 1. Capa com os parâmetros das duas partes.
 2. Parte 1: página com as tabelas de raio de curvatura, versores e cinemática
    cartesiana e intrínseca, seguida das figuras, uma por página. O texto indica
-   que o vídeo está anexado ao PDF.
+   que a animação está na Figura 2 e o vídeo, anexado ao PDF.
 3. Parte 2: tabela com `λ`, `P`, `ρ`, `τ`, `n` e `b`, seguida da figura 3D.
 4. O código-fonte de cálculo e a configuração.
 
