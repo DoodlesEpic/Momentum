@@ -95,8 +95,8 @@ def _parte_1(
             r"\qquad y = (R - r)\sin\theta - r\sin\left(\dfrac{R - r}{r}\,\theta\right)"
         ),
         _texto(
-            "A Figura 2 mostra a animação do item 1.2. O mesmo processo também é entregue como "
-            f"vídeo, no arquivo {Path(cfg.saida_animacao).name}, que vai anexado a este PDF. "
+            "A Figura 2 mostra a animação do item 1.2. O mesmo processo está no vídeo "
+            f"{Path(cfg.saida_animacao).name}, entregue junto com este PDF e também anexado a ele. "
             "Como na seção 16 do capítulo 3 das notas de aula, o raio de curvatura e os versores "
             r"saem das derivadas $\vec{r}\,' = d\vec{P}/d\theta$ e "
             r"$\vec{r}\,'' = d^2\vec{P}/d\theta^2$, com componente $z = 0$:"
@@ -190,8 +190,8 @@ def _parte_1(
 
 
 # Página da Figura 2 com o lugar reservado para a animação, que é colocada depois que o PDF
-# fica pronto.
-def _pagina_da_animacao(reserva: documento.Reserva) -> list:
+# fica pronto, e a nota ao professor sobre o vídeo entregue junto.
+def _pagina_da_animacao(reserva: documento.Reserva, video: str) -> list:
     return [
         Spacer(1, 1.6 * cm),
         Paragraph("Figura 2: Item 1.2: animação da geração", ESTILOS["secao"]),
@@ -199,9 +199,16 @@ def _pagina_da_animacao(reserva: documento.Reserva) -> list:
         Spacer(1, 0.2 * cm),
         Paragraph(
             "A animação roda sozinha em leitores de PDF que executam JavaScript, como o Google "
-            "Chrome e o Adobe Acrobat Reader. Nos demais aparece o primeiro quadro, e o mesmo "
-            "processo pode ser visto no vídeo anexado a este PDF.",
+            "Chrome, o Microsoft Edge e o Adobe Acrobat Reader. Nos demais aparece só o primeiro "
+            "quadro.",
             ESTILOS["legenda"],
+        ),
+        Spacer(1, 0.6 * cm),
+        Paragraph(
+            "<b>Nota ao professor</b>: se a animação não rodar no seu leitor de PDF, o mesmo "
+            f"processo pode ser visto no vídeo {Path(video).name}, entregue junto com este PDF. "
+            "O vídeo também vai anexado ao próprio PDF.",
+            ESTILOS["texto"],
         ),
         PageBreak(),
     ]
@@ -265,7 +272,7 @@ def gerar_pdf(
         _parametros(cfg),
         explicacao,
         ESTILOS,
-        credito_ao_claude=False,
+        mencionar_projeto=False,
     )
     conteudo += _parte_1(cfg, curvaturas, versores, cinematicas)
     conteudo += _pagina_de_figura(
@@ -275,7 +282,7 @@ def gerar_pdf(
         "O aro, a curva e as cúspides.",
     )
     reserva = documento.Reserva(12 * cm, 12 * cm)
-    conteudo += _pagina_da_animacao(reserva)
+    conteudo += _pagina_da_animacao(reserva, cfg.saida_animacao)
     figuras = [
         (
             desenho.figura_instantaneos(cfg),
@@ -313,7 +320,7 @@ def gerar_pdf(
         r"Figura 8: itens 2.1 e 2.3, curva $\mathcal{C}$",
         cfg.vista.descricao,
     )
-    documento.gerar_pdf(TAREFA, conteudo, arquivos, caminho)
+    documento.gerar_pdf(TAREFA, conteudo, arquivos, caminho, mencionar_projeto=False)
     documento.animar(
         caminho, desenho.quadros_jpeg(cfg), reserva, cfg.hipocicloide.quadros_por_segundo_pdf
     )

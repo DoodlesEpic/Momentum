@@ -22,6 +22,7 @@ from pygments import lex
 from pygments.lexers import get_lexer_for_filename
 from pygments.styles import get_style_by_name
 from pypdf import PdfWriter
+from pypdf.actions import JavaScript
 from pypdf.generic import (
     ArrayObject,
     DictionaryObject,
@@ -195,19 +196,20 @@ def vetor(v: np.ndarray) -> str:
 
 
 # Página de rosto com título, autor, parâmetros, explicação e créditos. A partir da
-# Tarefa 5 o professor dispensou o crédito ao Claude, que então pode ser omitido.
+# Tarefa 5 a entrega não menciona o projeto Momentum, a licença nem o Claude, que o
+# professor dispensou. Nesse caso o subtítulo vira o título.
 def capa(
     subtitulo: str,
     tarefa: str,
     parametros: list[str],
     explicacao: str,
     estilos_do_documento: dict,
-    credito_ao_claude: bool = True,
+    mencionar_projeto: bool = True,
 ) -> list:
     conteudo = [
         Spacer(1, 3 * cm),
-        Paragraph("Momentum", estilos_do_documento["titulo"]),
-        Paragraph(subtitulo, estilos_do_documento["subtitulo"]),
+        Paragraph("Momentum" if mencionar_projeto else subtitulo, estilos_do_documento["titulo"]),
+        Paragraph(subtitulo if mencionar_projeto else "", estilos_do_documento["subtitulo"]),
         Spacer(1, 1.4 * cm),
         Paragraph(f"{tarefa} de {DISCIPLINA}", estilos_do_documento["subtitulo"]),
         Paragraph(
@@ -227,11 +229,11 @@ def capa(
         Paragraph(
             f"Programa e figuras por {AUTOR} (ID USP {ID_USP})"
             + (
-                ", com auxílio do <b>Claude</b> (Anthropic) na escrita do código"
-                if credito_ao_claude
-                else ""
-            )
-            + f". Momentum {__version__}, distribuído sob a licença GNU GPL v3 ou posterior.",
+                ", com auxílio do <b>Claude</b> (Anthropic) na escrita do código. "
+                f"Momentum {__version__}, distribuído sob a licença GNU GPL v3 ou posterior."
+                if mencionar_projeto
+                else "."
+            ),
             estilos_do_documento["texto"],
         ),
         PageBreak(),
@@ -304,8 +306,11 @@ def codigo_colorido(fonte: str, nome: str) -> str:
     return "".join(partes)
 
 
-# Páginas finais com a listagem colorida de cada arquivo que gerou o documento.
-def paginas_do_codigo(arquivos: list[Path], estilos_do_documento: dict) -> list:
+# Páginas finais com a listagem colorida de cada arquivo que gerou o documento. Sem
+# mencionar o projeto, o cabeçalho de licença do início de cada arquivo fica de fora.
+def paginas_do_codigo(
+    arquivos: list[Path], estilos_do_documento: dict, mencionar_projeto: bool = True
+) -> list:
     conteudo = [
         Paragraph("Código-fonte", estilos_do_documento["secao"]),
         Paragraph(
@@ -316,6 +321,8 @@ def paginas_do_codigo(arquivos: list[Path], estilos_do_documento: dict) -> list:
     ]
     for arquivo in arquivos:
         fonte = arquivo.read_text(encoding="utf-8")
+        if not mencionar_projeto:
+            fonte = re.sub(r"\A# Momentum.*\n# Copyright.*\n# Licenciado.*\n\n?", "", fonte)
         conteudo += [
             CondPageBreak(3 * cm),
             Paragraph(f"<b>{escape(arquivo.name)}</b>", estilos_do_documento["arquivo"]),
@@ -327,12 +334,16 @@ def paginas_do_codigo(arquivos: list[Path], estilos_do_documento: dict) -> list:
 
 # Cria a função que o ReportLab chama em cada página para escrever o rodapé com a tarefa,
 # o autor e o número da página.
-def rodape_de(tarefa: str):
+def rodape_de(tarefa: str, mencionar_projeto: bool = True):
+    texto = f"{tarefa}, {AUTOR} ({ID_USP})"
+    if mencionar_projeto:
+        texto = f"Momentum, {texto}"
+
     def rodape(canvas, documento) -> None:
         canvas.saveState()
         canvas.setFont(FONTE_UNICODE, 8)
         canvas.setFillGray(0.4)
-        canvas.drawString(2 * cm, 1.2 * cm, f"Momentum, {tarefa}, {AUTOR} ({ID_USP})")
+        canvas.drawString(2 * cm, 1.2 * cm, texto)
         canvas.drawRightString(A4[0] - 2 * cm, 1.2 * cm, str(documento.page))
         canvas.restoreState()
 
@@ -340,13 +351,19 @@ def rodape_de(tarefa: str):
 
 
 # Grava o PDF em A4 com o conteúdo da tarefa, seguido da listagem do código-fonte.
-def gerar_pdf(tarefa: str, conteudo: list, arquivos: list[Path], caminho: str | Path) -> Path:
+def gerar_pdf(
+    tarefa: str,
+    conteudo: list,
+    arquivos: list[Path],
+    caminho: str | Path,
+    mencionar_projeto: bool = True,
+) -> Path:
     caminho = Path(caminho)
     caminho.parent.mkdir(parents=True, exist_ok=True)
     documento = SimpleDocTemplate(
         str(caminho),
         pagesize=A4,
-        title=f"Momentum - {tarefa}",
+        title=f"Momentum - {tarefa}" if mencionar_projeto else tarefa,
         author=AUTOR,
         subject=DISCIPLINA,
         leftMargin=2 * cm,
@@ -354,8 +371,8 @@ def gerar_pdf(tarefa: str, conteudo: list, arquivos: list[Path], caminho: str | 
         topMargin=2 * cm,
         bottomMargin=2 * cm,
     )
-    todo_o_conteudo = conteudo + paginas_do_codigo(arquivos, estilos())
-    rodape = rodape_de(tarefa)
+    todo_o_conteudo = conteudo + paginas_do_codigo(arquivos, estilos(), mencionar_projeto)
+    rodape = rodape_de(tarefa, mencionar_projeto)
     documento.build(todo_o_conteudo, onFirstPage=rodape, onLaterPages=rodape)
     return caminho
 
@@ -386,7 +403,9 @@ class Reserva(Flowable):
 
 # Põe uma animação no lugar reservado. Cada quadro JPEG vira um botão de formulário com a
 # imagem, todos no mesmo lugar e escondidos menos o primeiro, e um JavaScript mostra um quadro
-# de cada vez. Leitores sem JavaScript mostram só o primeiro quadro.
+# de cada vez. Leitores sem JavaScript mostram só o primeiro quadro. Cada quadro novo aparece
+# por cima dos anteriores, sem esconder nenhum, porque esconder botões faz o leitor do Edge
+# piscar. Só ao recomeçar a volta os quadros são escondidos, todos de uma vez.
 def animar(
     caminho_pdf: str | Path, quadros: list[bytes], reserva: Reserva, por_segundo: int
 ) -> None:
@@ -428,6 +447,7 @@ def animar(
                 ),
             }
         )
+        aparencia = escritor._add_object(aparencia)
         botao = DictionaryObject(
             {
                 NameObject("/Type"): NameObject("/Annot"),
@@ -437,9 +457,7 @@ def animar(
                 NameObject("/T"): TextStringObject(f"quadro{indice}"),
                 NameObject("/Rect"): ArrayObject([FloatObject(valor) for valor in canto]),
                 NameObject("/F"): NumberObject(4 if indice == 0 else 6),  # 2 esconde, 4 imprime
-                NameObject("/AP"): DictionaryObject(
-                    {NameObject("/N"): escritor._add_object(aparencia)}
-                ),
+                NameObject("/AP"): DictionaryObject({NameObject("/N"): aparencia}),
                 NameObject("/P"): pagina.indirect_reference,
             }
         )
@@ -448,14 +466,20 @@ def animar(
     escritor.root_object[NameObject("/AcroForm")] = DictionaryObject(
         {NameObject("/Fields"): botoes}
     )
-    escritor.add_js(
-        "var documento = this;\n"
-        "var quadro = 0;\n"
-        "function proximoQuadro() {\n"
-        '  documento.getField("quadro" + quadro).display = display.hidden;\n'
-        f"  quadro = (quadro + 1) % {len(quadros)};\n"
-        '  documento.getField("quadro" + quadro).display = display.visible;\n'
-        "}\n"
-        f'var relogio = app.setInterval("proximoQuadro()", {round(1000 / por_segundo)});\n'
+    escritor.add_open_action(
+        JavaScript(
+            "var documento = this;\n"
+            "var quadro = 0;\n"
+            "function proximoQuadro() {\n"
+            f"  quadro = (quadro + 1) % {len(quadros)};\n"
+            "  if (quadro == 0) {\n"
+            f"    for (var i = 1; i < {len(quadros)}; i++)\n"
+            '      documento.getField("quadro" + i).display = display.hidden;\n'
+            "  } else {\n"
+            '    documento.getField("quadro" + quadro).display = display.visible;\n'
+            "  }\n"
+            "}\n"
+            f'var relogio = app.setInterval("proximoQuadro()", {round(1000 / por_segundo)});\n'
+        )
     )
     escritor.write(caminho_pdf)
