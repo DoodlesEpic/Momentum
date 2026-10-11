@@ -5,7 +5,7 @@ Computação da Escola Politécnica da USP.
 
 O projeto gera um PDF por tarefa. Cada relatório contém capa, resultados,
 figuras e a listagem do código de cálculo e configuração. A Tarefa 5 também
-gera uma animação em GIF.
+gera um vídeo MP4, que também vai anexado ao PDF.
 
 ## Tarefas
 
@@ -55,7 +55,7 @@ x = (R - r) cos θ + r cos(((R - r) / r) θ)
 y = (R - r) sin θ - r sin(((R - r) / r) θ)
 ```
 
-O programa anima a geração da curva, mostra instantâneos, desenha exemplos
+O programa grava um vídeo da geração da curva, mostra instantâneos, desenha exemplos
 para quatro razões `R/r` e calcula o raio de curvatura, os versores tangente e
 normal principal e, com a lei horária `θ(t) = ω t` e `ω = π/60 rad/s`, a
 velocidade e a aceleração de `P` nas formas cartesiana e intrínseca. O exemplo
@@ -107,7 +107,9 @@ uv run momentum tarefa2 -c outro.toml -s relatorio.pdf
 ```
 
 Sem subcomando, são gerados `saida/tarefa_1.pdf`, `saida/tarefa_2.pdf`,
-`saida/tarefa_5.pdf` e a animação `saida/tarefa_5_hipocicloide.gif`.
+`saida/tarefa_5.pdf` e o vídeo `saida/tarefa_5_hipocicloide.mp4`. O vídeo
+fica anexado ao PDF da Tarefa 5 e aparece no painel de anexos de leitores como
+o Acrobat e o Firefox. O ffmpeg que grava o vídeo vem do pacote imageio-ffmpeg.
 Com apenas um subcomando, é gerado o PDF da tarefa escolhida. Sem o `uv`, com
 o ambiente virtual ativado, use `python -m momentum` da mesma forma.
 
@@ -125,7 +127,7 @@ mínimo antes de gerar o PDF.
 
 Na Tarefa 5, a seção `[hipocicloide]` define `R`, `r`, as razões dos exemplos,
 os ângulos dos instantâneos e dos pontos analisados, em graus, `ω`, os instantes
-e a animação. A seção `[cubica]` define o trecho desenhado da curva e os três
+e o vídeo. A seção `[cubica]` define o trecho desenhado da curva e os três
 valores de `λ`, que devem ser diferentes de zero. Posições sobre uma cúspide da
 hipociclóide são rejeitadas, porque nelas a velocidade se anula e os versores
 tangente e normal não existem.
@@ -134,9 +136,9 @@ tangente e normal não existem.
 
 O fluxo em [.github/workflows/momentum.yml](.github/workflows/momentum.yml)
 executa o programa a cada push na branch `main` e também sob demanda. Os PDFs
-e a animação são guardados como artefatos. Quando a versão declarada no
+e o vídeo são guardados como artefatos. Quando a versão declarada no
 `pyproject.toml` ainda não tem uma release, o fluxo publica uma release com o
-código-fonte, os relatórios e a animação.
+código-fonte, os relatórios e o vídeo.
 
 ## Licença
 
@@ -147,4 +149,5 @@ completo está em [LICENSE](LICENSE).
 
 Eduardo Lima Moraes, ID USP 16802140.
 
-Desenvolvido com auxílio do Claude (Anthropic).
+Desenvolvido com auxílio do Claude (Anthropic). A partir da Tarefa 5, o
+professor dispensou esse crédito nos relatórios entregues.

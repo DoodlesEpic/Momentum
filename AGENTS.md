@@ -34,7 +34,7 @@ resultados.
 
 Estuda a geometria e a cinemática de curvas. O enunciado está em
 [enunciados/tarefa_5.md](enunciados/tarefa_5.md) e tem duas partes. A primeira
-traça e anima a hipociclóide de um disco que rola dentro de um aro, mostra
+traça a hipociclóide, grava um vídeo da sua geração de um disco que rola dentro de um aro, mostra
 instantâneos e quatro razões `R/r`, e calcula o raio de curvatura, os versores
 tangente e normal principal e a velocidade e a aceleração de `P` nas formas
 cartesiana e intrínseca. A segunda calcula o raio de curvatura e o triedro de
@@ -47,7 +47,10 @@ notação seguem o capítulo 3 das notas de aula.
 - Nada de travessões nem de pontos e vírgulas em textos e comentários. Use
   vírgulas, pontos ou frases separadas.
 - Nada de negrito no texto do README.
-- Comentários pontuais, apenas onde explicam uma decisão que o código não mostra.
+- Cada função e cada classe tem, logo acima, um comentário de uma ou duas linhas
+  dizendo o que faz e como faz, escrito para quem tem dificuldade em Mecânica I
+  ou ainda sabe pouco de programação. Esses comentários substituem as docstrings.
+  Fora isso, comentários só onde explicam uma decisão que o código não mostra.
 
 ## Commits
 
@@ -57,7 +60,7 @@ notação seguem o capítulo 3 das notas de aula.
   `feat: adiciona leitura da configuração em TOML`.
 - Nada de `Co-authored-by`, `Signed-off-by`, `Generated with` ou qualquer outra
   linha de créditos ou atribuição a ferramentas nas mensagens de commit. Os
-  créditos ficam no README e no PDF.
+  créditos ficam no README e, nas tarefas 1 e 2, no PDF.
 - O autor e o committer são sempre a identidade git indicada pelo dono do
   repositório, e não a configuração global da máquina nem a de uma ferramenta.
 
@@ -77,11 +80,14 @@ notação seguem o capítulo 3 das notas de aula.
 ## Comportamento do programa
 
 - Cada tarefa gera um PDF com a capa, as figuras e o código-fonte. A tarefa 5
-  também grava a animação da hipociclóide em GIF.
+  também grava o vídeo da hipociclóide em MP4 e o anexa ao PDF.
 - Na tarefa 1 são três visualizações, uma perspectiva isométrica, uma projeção
   ortográfica e uma terceira de outra maneira, hoje a vista axial alinhada com a
   linha de ação da força.
-- O PDF credita Eduardo Lima Moraes, ID USP 16802140, e também o Claude.
+- O PDF credita Eduardo Lima Moraes, ID USP 16802140. Os PDFs das tarefas 1 e 2
+  também creditam o Claude, mas a partir da tarefa 5 o professor dispensou esse
+  crédito, e ele não deve aparecer nas entregas novas.
+- Os números no PDF têm no máximo três casas decimais, para ficarem legíveis.
 - Tudo que muda a visualização fica no TOML da tarefa, em `config/`, sem
   precisar editar código.
 - Os relatórios usam a fonte DejaVu, que vem com o matplotlib, porque as fontes
@@ -91,8 +97,8 @@ notação seguem o capítulo 3 das notas de aula.
 
 O fluxo do GitHub Actions em
 [.github/workflows/momentum.yml](.github/workflows/momentum.yml) executa o
-programa a cada push na `main`, guarda os PDFs e a animação como artefatos e
-publica uma release com o código, os PDFs e a animação sempre que a versão do
+programa a cada push na `main`, guarda os PDFs e o vídeo como artefatos e
+publica uma release com o código, os PDFs e o vídeo sempre que a versão do
 `pyproject.toml` muda.
 
 ## Releases
