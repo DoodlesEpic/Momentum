@@ -19,6 +19,9 @@ instantes = [10.0, 20.0, 35.0]
 pontos_da_curva = 2000
 quadros = 180
 quadros_por_segundo = 30
+# Animação embutida no PDF, com menos quadros para o arquivo não ficar pesado
+quadros_pdf = 90
+quadros_por_segundo_pdf = 15
 dpi_animacao = 100
 # Fração de R ocupada pelo maior vetor desenhado
 escala_velocidade = 0.4

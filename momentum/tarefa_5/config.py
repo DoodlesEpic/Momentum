@@ -43,6 +43,8 @@ class Hipocicloide:
     pontos_da_curva: int = 2000
     quadros: int = 180
     quadros_por_segundo: int = 30
+    quadros_pdf: int = 90
+    quadros_por_segundo_pdf: int = 15
     dpi_animacao: int = 100
     escala_velocidade: float = 0.4
     escala_aceleracao: float = 0.4

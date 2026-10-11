@@ -17,6 +17,19 @@ from .cubica import Triedro
 from .hipocicloide import Cinematica, Curvatura
 
 TAREFA = "Tarefa Optativa 5"
+ESTILOS = documento.estilos()
+
+
+# Página de uma figura, com os trechos entre $ do título e da legenda desenhados como fórmulas.
+def _pagina_de_figura(cfg: Config, figura, titulo: str, legenda: str) -> list:
+    titulo = documento.com_formulas(titulo, 13)
+    legenda = documento.com_formulas(legenda, 9)
+    return documento.pagina_de_figura(figura, titulo, legenda, cfg.dpi, ESTILOS)
+
+
+# Parágrafo de texto em que os trechos entre $ são desenhados como fórmulas.
+def _texto(texto: str) -> Paragraph:
+    return Paragraph(documento.com_formulas(texto), ESTILOS["texto"])
 
 
 # Escreve um número com no máximo três casas decimais, sem zeros sobrando à direita.
@@ -35,68 +48,82 @@ def _graus(theta: float) -> str:
     return _numero(np.degrees(theta)) + "°"
 
 
-# Monta uma tabela com larguras de coluna dadas em centímetros.
+# Tabela com o cabeçalho em notação matemática e larguras de coluna em centímetros.
 def _tabela(cabecalho: list[str], linhas: list[list[str]], larguras: list[float]):
-    return documento.tabela(cabecalho, linhas, [largura * cm for largura in larguras])
+    titulos = [
+        Paragraph(documento.com_formulas(titulo, 8), ESTILOS["cabecalho"]) for titulo in cabecalho
+    ]
+    return documento.tabela(titulos, linhas, [largura * cm for largura in larguras])
 
 
 # Linhas da capa que resumem os dados de entrada das duas partes.
 def _parametros(cfg: Config) -> list[str]:
     h = cfg.hipocicloide
     c = cfg.cubica
-    return [
-        f"<b>Aro e disco</b>: R = {_numero(h.raio_aro)}, r = {_numero(h.raio_disco)}",
-        f"<b>Razões R/r dos exemplos</b>: {', '.join(_numero(razao) for razao in h.razoes)}",
-        f"<b>Lei horária</b>: θ(t) = ω t, com ω = π/60 ≈ {_numero(h.omega)} rad/s",
-        f"<b>Instantes</b>: {', '.join(f'{_numero(t)} s' for t in h.instantes)}",
-        (
-            f"<b>Curva C</b>: λ de {_numero(c.lambda_minimo)} a {_numero(c.lambda_maximo)}, "
-            f"triedros em λ = {', '.join(_numero(valor) for valor in c.parametros)}"
-        ),
+    linhas = [
+        f"<b>Aro e disco</b>: $R = {_numero(h.raio_aro)}$ e $r = {_numero(h.raio_disco)}$",
+        f"<b>Razões $R/r$ dos exemplos</b>: {', '.join(_numero(razao) for razao in h.razoes)}",
+        rf"<b>Lei horária</b>: $\theta(t) = \omega t$, com "
+        rf"$\omega = \pi/60 \approx {_numero(h.omega)}$ rad/s",
+        f"<b>Instantes</b>: {', '.join(f'$t = {_numero(t)}$ s' for t in h.instantes)}",
+        rf"<b>Curva $\mathcal{{C}}$</b>: $\lambda$ de {_numero(c.lambda_minimo)} a "
+        rf"{_numero(c.lambda_maximo)}, triedros em $\lambda$ = "
+        + ", ".join(_numero(valor) for valor in c.parametros),
     ]
+    return [documento.com_formulas(linha) for linha in linhas]
 
 
-# Texto e tabelas da parte 1: equações da curva, raio de curvatura (1.5), versores (1.6)
-# e velocidade e aceleração nas formas cartesiana e intrínseca (1.7).
+# Texto e tabelas da parte 1: equações da curva, procedimento das notas de aula, raio de
+# curvatura (1.5), versores (1.6) e velocidade e aceleração (1.7).
 def _parte_1(
     cfg: Config,
     curvaturas: list[Curvatura],
     versores: list[Curvatura],
     cinematicas: list[Cinematica],
-    estilos: dict,
 ) -> list:
     h = cfg.hipocicloide
     escala_v, escala_a = desenho.escalas_cinematica(cfg, cinematicas)
-    texto = estilos["texto"]
     return [
-        Paragraph("Parte 1: hipociclóide", estilos["secao"]),
-        Paragraph(
-            f"Um disco de raio r = {_numero(h.raio_disco)} rola sem escorregar dentro de um aro "
-            f"de raio R = {_numero(h.raio_aro)}. O ponto P do disco descreve "
-            "x = (R - r) cos θ + r cos(kθ) e y = (R - r) sin θ - r sin(kθ), com k = (R - r) / r. "
-            f"O vídeo do item 1.2, {Path(cfg.saida_animacao).name}, está anexado a este PDF, "
-            "no painel de anexos do leitor, e é entregue também como arquivo separado. A Figura 2 "
-            "mostra quadros desse vídeo.",
-            texto,
+        Paragraph("Parte 1: hipociclóide", ESTILOS["secao"]),
+        _texto(
+            f"Um disco de raio $r = {_numero(h.raio_disco)}$ rola sem escorregar dentro de um aro "
+            f"de raio $R = {_numero(h.raio_aro)}$. O ponto $P$ da periferia do disco descreve a "
+            "hipociclóide"
         ),
-        Paragraph(
-            "Como no capítulo 3 das notas de aula, com r' = dP/dθ e r'' = d²P/dθ²: "
-            "ρ = |r'|³ / |r' ∧ r''|, τ = r' / |r'|, b = (r' ∧ r'') / |r' ∧ r''| = ±k e n = b ∧ τ. "
-            "Nas cúspides r' = 0, e τ e n não são definidos.",
-            texto,
+        documento.formula(
+            r"x = (R - r)\cos\theta + r\cos\left(\dfrac{R - r}{r}\,\theta\right)"
+            r"\qquad y = (R - r)\sin\theta - r\sin\left(\dfrac{R - r}{r}\,\theta\right)"
         ),
-        Paragraph("Item 1.5: raio de curvatura", estilos["secao"]),
+        _texto(
+            "A Figura 2 mostra a animação do item 1.2. O mesmo processo também é entregue como "
+            f"vídeo, no arquivo {Path(cfg.saida_animacao).name}, que vai anexado a este PDF. "
+            "Como na seção 16 do capítulo 3 das notas de aula, o raio de curvatura e os versores "
+            r"saem das derivadas $\vec{r}\,' = d\vec{P}/d\theta$ e "
+            r"$\vec{r}\,'' = d^2\vec{P}/d\theta^2$, com componente $z = 0$:"
+        ),
+        documento.formula(
+            r"\rho = \dfrac{|\vec{r}\,'|^3}{|\vec{r}\,' \wedge \vec{r}\,''|}"
+            r"\qquad \vec{\tau} = \dfrac{\vec{r}\,'}{|\vec{r}\,'|}"
+            r"\qquad \vec{b} = "
+            r"\dfrac{\vec{r}\,' \wedge \vec{r}\,''}{|\vec{r}\,' \wedge \vec{r}\,''|}"
+            r"\qquad \vec{n} = \vec{b} \wedge \vec{\tau}"
+        ),
+        _texto(
+            r"No plano, $\vec{b} = \pm\vec{k}$. Nas cúspides $\vec{r}\,' = \vec{0}$, e "
+            r"$\vec{\tau}$ e $\vec{n}$ não são definidos."
+        ),
+        Paragraph("Item 1.5: raio de curvatura", ESTILOS["secao"]),
         _tabela(
-            ["Ponto", "θ", "P", "ρ", "Centro de curvatura"],
+            ["Ponto", r"$\theta$", "$P$", r"$\rho$", "Centro de curvatura"],
             [
                 [str(i), _graus(c.theta), _vetor(c.ponto), _numero(c.raio), _vetor(c.centro)]
                 for i, c in enumerate(curvaturas, start=1)
             ],
             [1.5, 2.0, 4.8, 2.0, 5.7],
         ),
-        Paragraph("Item 1.6: versores tangente e normal principal", estilos["secao"]),
+        Paragraph("Item 1.6: versores tangente e normal principal", ESTILOS["secao"]),
         _tabela(
-            ["θ", "P", "τ", "n"],
+            [r"$\theta$", "$P$", r"$\vec{\tau}$", r"$\vec{n}$"],
             [
                 [_graus(c.theta), _vetor(c.ponto), _vetor(c.tangente), _vetor(c.normal)]
                 for c in versores
@@ -104,20 +131,33 @@ def _parte_1(
             [2.0, 4.4, 4.8, 4.8],
         ),
         PageBreak(),
-        Paragraph("Item 1.7: velocidade e aceleração", estilos["secao"]),
-        Paragraph(
-            "Com θ(t) = ω t, a regra da cadeia dá v = ω dP/dθ e, como ω é constante, "
-            "a = ω² d²P/dθ². Na forma intrínseca, v = v τ e a = a_τ τ + a_n n, com v = |v|, "
-            "a_τ = dv/dt = a · τ e a_n = v² / ρ = a · n. Comprimentos na mesma unidade de R e r, "
-            "tempos em segundos.",
-            texto,
+        Paragraph("Item 1.7: velocidade e aceleração", ESTILOS["secao"]),
+        _texto(
+            r"Com a lei horária $\theta(t) = \omega t$ e $\omega$ constante, a regra da cadeia dá"
         ),
-        Paragraph("Forma cartesiana", texto),
+        documento.formula(
+            r"\vec{v} = \omega\,\dfrac{d\vec{P}}{d\theta}"
+            r"\qquad \vec{a} = \omega^2\,\dfrac{d^2\vec{P}}{d\theta^2}"
+            r"\qquad \omega = \dfrac{\pi}{60}\ \mathrm{rad/s}"
+        ),
+        _texto("e, na forma intrínseca,"),
+        documento.formula(
+            r"\vec{v} = v\,\vec{\tau}"
+            r"\qquad \vec{a} = a_\tau\,\vec{\tau} + a_n\,\vec{n}"
+            r"\qquad a_\tau = \dfrac{dv}{dt} = \vec{a} \cdot \vec{\tau}"
+            r"\qquad a_n = \dfrac{v^2}{\rho} = \vec{a} \cdot \vec{n}"
+        ),
+        _texto(
+            "Comprimentos na mesma unidade de $R$ e $r$, tempos em segundos. "
+            rf"Na Figura 7, $\vec{{v}}$ aparece multiplicada por {_numero(escala_v)} e "
+            rf"$\vec{{a}}$ por {_numero(escala_a)}."
+        ),
+        _texto("Forma cartesiana"),
         _tabela(
-            ["t", "θ", "P", "v", "a"],
+            ["$t$ (s)", r"$\theta$", "$P$", r"$\vec{v}$", r"$\vec{a}$"],
             [
                 [
-                    f"{_numero(k.t)} s",
+                    _numero(k.t),
                     _graus(k.curvatura.theta),
                     _vetor(k.curvatura.ponto),
                     _vetor(k.velocidade),
@@ -128,12 +168,12 @@ def _parte_1(
             [1.4, 1.6, 3.6, 4.7, 4.7],
         ),
         Spacer(1, 0.3 * cm),
-        Paragraph("Coordenadas intrínsecas", texto),
+        _texto("Coordenadas intrínsecas"),
         _tabela(
-            ["t", "v", "a_τ", "a_n", "ρ", "τ", "n"],
+            ["$t$ (s)", "$v$", r"$a_\tau$", "$a_n$", r"$\rho$", r"$\vec{\tau}$", r"$\vec{n}$"],
             [
                 [
-                    f"{_numero(k.t)} s",
+                    _numero(k.t),
                     _numero(np.linalg.norm(k.velocidade)),
                     _numero(k.a_tangencial),
                     _numero(k.a_normal),
@@ -145,11 +185,23 @@ def _parte_1(
             ],
             [1.4, 1.6, 1.6, 1.6, 1.6, 4.1, 4.1],
         ),
+        PageBreak(),
+    ]
+
+
+# Página da Figura 2 com o lugar reservado para a animação, que é colocada depois que o PDF
+# fica pronto.
+def _pagina_da_animacao(reserva: documento.Reserva) -> list:
+    return [
+        Spacer(1, 1.6 * cm),
+        Paragraph("Figura 2: Item 1.2: animação da geração", ESTILOS["secao"]),
+        reserva,
         Spacer(1, 0.2 * cm),
         Paragraph(
-            f"Na Figura 6, v aparece multiplicada por {_numero(escala_v)} "
-            f"e a por {_numero(escala_a)}.",
-            texto,
+            "A animação roda sozinha em leitores de PDF que executam JavaScript, como o Google "
+            "Chrome e o Adobe Acrobat Reader. Nos demais aparece o primeiro quadro, e o mesmo "
+            "processo pode ser visto no vídeo anexado a este PDF.",
+            ESTILOS["legenda"],
         ),
         PageBreak(),
     ]
@@ -157,24 +209,27 @@ def _parte_1(
 
 # Texto e tabelas da parte 2: o raio de curvatura (2.2) e o triedro de Frenet (2.3) nos
 # três pontos escolhidos da curva C.
-def _parte_2(triedros: list[Triedro], estilos: dict) -> list:
+def _parte_2(triedros: list[Triedro]) -> list:
     return [
-        Paragraph("Parte 2: curva C", estilos["secao"]),
-        Paragraph(
-            "Para r(λ) = (λ, λ², λ³), vale r' = (1, 2λ, 3λ²) e r'' = (0, 2, 6λ). Pelo mesmo "
-            "procedimento do capítulo 3, ρ = |r'|³ / |r' ∧ r''|, τ = r' / |r'|, "
-            "b = (r' ∧ r'') / |r' ∧ r''| e n = b ∧ τ.",
-            estilos["texto"],
+        Paragraph(documento.com_formulas(r"Parte 2: curva $\mathcal{C}$", 13), ESTILOS["secao"]),
+        _texto(r"A curva $\mathcal{C}$ e as suas derivadas são"),
+        documento.formula(
+            r"\vec{r}(\lambda) = (\lambda,\ \lambda^2,\ \lambda^3)"
+            r"\qquad \vec{r}\,' = (1,\ 2\lambda,\ 3\lambda^2)"
+            r"\qquad \vec{r}\,'' = (0,\ 2,\ 6\lambda)"
         ),
-        Paragraph("Item 2.2: raio de curvatura", estilos["secao"]),
+        _texto(
+            r"e $\rho$, $\vec{\tau}$, $\vec{n}$ e $\vec{b}$ saem do mesmo procedimento da parte 1."
+        ),
+        Paragraph("Item 2.2: raio de curvatura", ESTILOS["secao"]),
         _tabela(
-            ["λ", "P", "ρ"],
+            [r"$\lambda$", "$P$", r"$\rho$"],
             [[_numero(t.parametro), _vetor(t.ponto), _numero(t.raio)] for t in triedros],
             [2.0, 9.0, 5.0],
         ),
-        Paragraph("Item 2.3: triedro de Frenet", estilos["secao"]),
+        Paragraph("Item 2.3: triedro de Frenet", ESTILOS["secao"]),
         _tabela(
-            ["λ", "τ", "n", "b"],
+            [r"$\lambda$", r"$\vec{\tau}$", r"$\vec{n}$", r"$\vec{b}$"],
             [
                 [_numero(t.parametro), _vetor(t.tangente), _vetor(t.normal), _vetor(t.binormal)]
                 for t in triedros
@@ -185,8 +240,8 @@ def _parte_2(triedros: list[Triedro], estilos: dict) -> list:
     ]
 
 
-# Monta o PDF completo: capa, parte 1 com as figuras 1 a 6, parte 2 com a figura 7 e o
-# código-fonte. Por fim anexa o vídeo do item 1.2 ao PDF.
+# Monta o PDF completo: capa, parte 1 com as figuras 1 a 7, parte 2 com a figura 8 e o
+# código-fonte. Depois põe a animação no lugar reservado e anexa o vídeo.
 def gerar_pdf(
     cfg: Config,
     curvaturas: list[Curvatura],
@@ -196,34 +251,42 @@ def gerar_pdf(
     arquivos: list[Path],
     caminho: str | Path,
 ) -> Path:
-    estilos = documento.estilos()
-    explicacao = (
+    explicacao = documento.com_formulas(
         "Na primeira parte, o programa traça a hipociclóide gerada por um disco que rola dentro "
-        "de um aro, grava um vídeo do processo, mostra instantâneos e exemplos para quatro "
-        "razões R/r, e calcula o raio de curvatura, os versores tangente e normal principal e a "
-        "velocidade e a aceleração de P nas formas cartesiana e intrínseca. Na segunda parte, "
-        "calcula o raio de curvatura e o triedro de Frenet da curva (λ, λ², λ³) em três pontos."
+        "de um aro, anima o processo, mostra instantâneos e exemplos para quatro razões $R/r$, e "
+        "calcula o raio de curvatura, os versores tangente e normal principal e a velocidade e a "
+        "aceleração de $P$ nas formas cartesiana e intrínseca. Na segunda parte, calcula o raio "
+        r"de curvatura e o triedro de Frenet da curva $(\lambda,\ \lambda^2,\ \lambda^3)$ em três "
+        "pontos."
     )
     conteudo = documento.capa(
         "Hipociclóide e triedro de Frenet",
         TAREFA,
         _parametros(cfg),
         explicacao,
-        estilos,
+        ESTILOS,
         credito_ao_claude=False,
     )
-    conteudo += _parte_1(cfg, curvaturas, versores, cinematicas, estilos)
+    conteudo += _parte_1(cfg, curvaturas, versores, cinematicas)
+    conteudo += _pagina_de_figura(
+        cfg,
+        desenho.figura_curva(cfg),
+        "Figura 1: Item 1.1: hipociclóide",
+        "O aro, a curva e as cúspides.",
+    )
+    reserva = documento.Reserva(12 * cm, 12 * cm)
+    conteudo += _pagina_da_animacao(reserva)
     figuras = [
-        (desenho.figura_curva(cfg), "Item 1.1: hipociclóide", "O aro, a curva e as cúspides."),
         (
             desenho.figura_instantaneos(cfg),
             "Item 1.3: instantâneos da geração",
-            "O disco, o raio CP, o ponto de contato com o aro e o traço de P até cada θ.",
+            r"O disco, o raio $CP$, o ponto de contato com o aro e o traço de $P$ "
+            r"até cada $\theta$.",
         ),
         (
             desenho.figura_razoes(cfg),
-            "Item 1.4: quatro razões R/r",
-            "Com R/r = p/q irredutível, a curva tem p cúspides e fecha após q voltas.",
+            "Item 1.4: quatro razões $R/r$",
+            "Com $R/r = p/q$ irredutível, a curva tem $p$ cúspides e fecha após $q$ voltas.",
         ),
         (
             desenho.figura_curvatura(cfg, curvaturas),
@@ -238,21 +301,21 @@ def gerar_pdf(
         (
             desenho.figura_cinematica(cfg, cinematicas),
             "Item 1.7: velocidade e aceleração",
-            "Vetores v e a de P nos três instantes, nas escalas indicadas no texto.",
+            "Vetores velocidade e aceleração de $P$ nos três instantes, nas escalas do texto.",
         ),
     ]
-    for numero, (figura, titulo, legenda) in enumerate(figuras, start=1):
-        conteudo += documento.pagina_de_figura(
-            figura, f"Figura {numero}: {titulo}", legenda, cfg.dpi, estilos
-        )
-    conteudo += _parte_2(triedros, estilos)
-    conteudo += documento.pagina_de_figura(
+    for numero, (figura, titulo, legenda) in enumerate(figuras, start=3):
+        conteudo += _pagina_de_figura(cfg, figura, f"Figura {numero}: {titulo}", legenda)
+    conteudo += _parte_2(triedros)
+    conteudo += _pagina_de_figura(
+        cfg,
         desenho.figura_cubica(cfg, triedros),
-        "Figura 7: itens 2.1 e 2.3, curva C",
+        r"Figura 8: itens 2.1 e 2.3, curva $\mathcal{C}$",
         cfg.vista.descricao,
-        cfg.dpi,
-        estilos,
     )
     documento.gerar_pdf(TAREFA, conteudo, arquivos, caminho)
+    documento.animar(
+        caminho, desenho.quadros_jpeg(cfg), reserva, cfg.hipocicloide.quadros_por_segundo_pdf
+    )
     documento.anexar(caminho, cfg.saida_animacao)
     return Path(caminho)

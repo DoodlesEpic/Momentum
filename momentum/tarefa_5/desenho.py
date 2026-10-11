@@ -4,6 +4,7 @@
 
 """Figuras e animação da hipociclóide e da curva (λ, λ², λ³)."""
 
+import io
 from fractions import Fraction
 from pathlib import Path
 
@@ -75,7 +76,7 @@ def desenhar_rolamento(eixos, cfg: Config, theta: float) -> None:
     C = hipocicloide.centro_do_disco(R, r, theta)
     T = hipocicloide.ponto_de_contato(R, theta)
     tracado = np.vstack([pontos[thetas < theta], P])
-    _plano(eixos, cfg, f"θ = {np.degrees(theta):.0f}°")
+    _plano(eixos, cfg, rf"$\theta = {np.degrees(theta):.0f}^\circ$")
     eixos.plot(*pontos.T, color=cores["curva"], lw=0.6, ls=":", alpha=0.5)
     eixos.plot(*tracado.T, color=cores["curva"], lw=1.8)
     eixos.plot(*_circulo(C, r).T, color=cores["disco"], lw=1.4)
@@ -83,7 +84,7 @@ def desenhar_rolamento(eixos, cfg: Config, theta: float) -> None:
     eixos.plot(*C, "o", color=cores["disco"], ms=3)
     eixos.plot(*T, "o", color=cores["aro"], ms=4)
     eixos.plot(*P, "o", color=cores["ponto"], ms=5)
-    eixos.text(*(P + 0.06 * R), "P", fontsize=9)
+    eixos.text(*(P + 0.06 * R), "$P$", fontsize=9)
 
 
 # Item 1.1: a hipociclóide completa dentro do aro, com as cúspides marcadas.
@@ -92,14 +93,14 @@ def figura_curva(cfg: Config) -> Figure:
     R, r = h.raio_aro, h.raio_disco
     figura = Figure(figsize=(6.4, 6.4))
     eixos = figura.subplots()
-    _plano(eixos, cfg, f"Hipociclóide com R = {R:g} e r = {r:g}")
+    _plano(eixos, cfg, f"Hipociclóide com $R = {R:g}$ e $r = {r:g}$")
     eixos.plot(*_curva(cfg, R, r)[1].T, color=cfg.cores["curva"], lw=1.8)
     cuspides = hipocicloide.cuspides(R, r, hipocicloide.voltas(R / r, h.voltas_maximas))
     eixos.plot(*cuspides.T, "o", color=cfg.cores["ponto"], ms=4)
     _legenda(
         eixos,
         [
-            (cfg.cores["aro"], "aro de raio R"),
+            (cfg.cores["aro"], "aro de raio $R$"),
             (cfg.cores["curva"], "hipociclóide"),
             (cfg.cores["ponto"], "cúspides"),
         ],
@@ -125,7 +126,12 @@ def figura_razoes(cfg: Config) -> Figure:
         r = h.raio_aro / razao
         fracao = Fraction(razao).limit_denominator(h.voltas_maximas)
         voltas = "1 volta" if fracao.denominator == 1 else f"{fracao.denominator} voltas"
-        _plano(eixos, cfg, f"R/r = {fracao}, fecha após {voltas}")
+        razao_tex = (
+            rf"\frac{{{fracao.numerator}}}{{{fracao.denominator}}}"
+            if fracao.denominator > 1
+            else f"{fracao}"
+        )
+        _plano(eixos, cfg, rf"$\frac{{R}}{{r}} = {razao_tex}$, fecha após {voltas}")
         eixos.plot(*_curva(cfg, h.raio_aro, r)[1].T, color=cfg.cores["curva"], lw=1.4)
     figura.tight_layout()
     return figura
@@ -165,7 +171,13 @@ def figura_versores(cfg: Config, curvaturas: list[hipocicloide.Curvatura]) -> Fi
         eixos.plot(*item.ponto, "o", color=cores["ponto"], ms=3)
         _seta(eixos, item.ponto, comprimento * item.tangente, cores["tangente"])
         _seta(eixos, item.ponto, comprimento * item.normal, cores["normal"])
-    _legenda(eixos, [(cores["tangente"], "tangente τ"), (cores["normal"], "normal principal n")])
+    _legenda(
+        eixos,
+        [
+            (cores["tangente"], r"tangente $\vec{\tau}$"),
+            (cores["normal"], r"normal principal $\vec{n}$"),
+        ],
+    )
     figura.tight_layout()
     return figura
 
@@ -188,15 +200,21 @@ def figura_cinematica(cfg: Config, cinematicas: list[hipocicloide.Cinematica]) -
     escala_v, escala_a = escalas_cinematica(cfg, cinematicas)
     figura = Figure(figsize=(6.4, 6.4))
     eixos = figura.subplots()
-    _plano(eixos, cfg, f"Velocidade e aceleração com ω = {h.omega:.3f} rad/s")
+    _plano(eixos, cfg, r"Velocidade e aceleração com $\omega = \pi/60$ rad/s")
     eixos.plot(*_curva(cfg, h.raio_aro, h.raio_disco)[1].T, color=cores["curva"], lw=1.6)
     for item in cinematicas:
         ponto = item.curvatura.ponto
         eixos.plot(*ponto, "o", color=cores["ponto"], ms=4)
         _seta(eixos, ponto, escala_v * item.velocidade, cores["velocidade"])
         _seta(eixos, ponto, escala_a * item.aceleracao, cores["aceleracao"])
-        eixos.text(*(ponto + 0.05 * h.raio_aro), f"t = {item.t:g} s", fontsize=8)
-    _legenda(eixos, [(cores["velocidade"], "velocidade v"), (cores["aceleracao"], "aceleração a")])
+        eixos.text(*(ponto + 0.05 * h.raio_aro), f"$t = {item.t:g}$ s", fontsize=8)
+    _legenda(
+        eixos,
+        [
+            (cores["velocidade"], r"velocidade $\vec{v}$"),
+            (cores["aceleracao"], r"aceleração $\vec{a}$"),
+        ],
+    )
     figura.tight_layout()
     return figura
 
@@ -210,40 +228,65 @@ def figura_cubica(cfg: Config, triedros: list[cubica.Triedro]) -> Figure:
     eixos.plot(*pontos.T, color=cores["curva"], lw=1.6)
     pontas = []
     for item in triedros:
-        cena.marcar_ponto(eixos, item.ponto, cores["ponto"], f"λ = {item.parametro:g}")
+        cena.marcar_ponto(eixos, item.ponto, cores["ponto"], rf"$\lambda = {item.parametro:g}$")
         for versor, cor, rotulo in (
-            (item.tangente, cores["tangente"], "τ"),
-            (item.normal, cores["normal"], "n"),
-            (item.binormal, cores["binormal"], "b"),
+            (item.tangente, cores["tangente"], r"$\vec{\tau}$"),
+            (item.normal, cores["normal"], r"$\vec{n}$"),
+            (item.binormal, cores["binormal"], r"$\vec{b}$"),
         ):
             vetor = c.comprimento_versores * versor
             pontas.append(cena.seta(eixos, item.ponto, vetor, cor, rotulo, largura=1.6))
-    cena.finalizar(eixos, np.vstack([pontos, *pontas]), cfg.vista, "Curva C e triedros de Frenet")
+    cena.finalizar(
+        eixos, np.vstack([pontos, *pontas]), cfg.vista, r"Curva $\mathcal{C}$ e triedros de Frenet"
+    )
     _legenda(
         eixos,
         [
-            (cores["curva"], "curva C"),
-            (cores["tangente"], "tangente τ"),
-            (cores["normal"], "normal principal n"),
-            (cores["binormal"], "binormal b"),
+            (cores["curva"], r"curva $\mathcal{C}$"),
+            (cores["tangente"], r"tangente $\vec{\tau}$"),
+            (cores["normal"], r"normal principal $\vec{n}$"),
+            (cores["binormal"], r"binormal $\vec{b}$"),
         ],
     )
     return figura
 
 
-# Item 1.2: grava o vídeo MP4 da geração. Desenha um quadro para cada θ entre 0 e o
-# ângulo em que a curva fecha e entrega cada quadro ao ffmpeg.
+# Ângulos θ dos quadros de uma animação, igualmente espaçados entre 0 e o ângulo em que a
+# curva fecha.
+def _angulos_da_animacao(cfg: Config, quantidade: int) -> np.ndarray:
+    h = cfg.hipocicloide
+    final = 2 * np.pi * hipocicloide.voltas(h.raio_aro / h.raio_disco, h.voltas_maximas)
+    return np.linspace(0.0, final, quantidade)
+
+
+# Item 1.2: grava o vídeo MP4 da geração. Desenha um quadro para cada θ e entrega cada
+# quadro ao ffmpeg.
 def gravar_animacao(cfg: Config) -> Path:
     h = cfg.hipocicloide
     caminho = Path(cfg.saida_animacao)
     caminho.parent.mkdir(parents=True, exist_ok=True)
     figura = Figure(figsize=(5.0, 5.0))
     eixos = figura.subplots()
-    final = 2 * np.pi * hipocicloide.voltas(h.raio_aro / h.raio_disco, h.voltas_maximas)
     escritor = FFMpegWriter(fps=h.quadros_por_segundo)
     with escritor.saving(figura, str(caminho), dpi=h.dpi_animacao):
-        for theta in np.linspace(0.0, final, h.quadros):
+        for theta in _angulos_da_animacao(cfg, h.quadros):
             eixos.clear()
             desenhar_rolamento(eixos, cfg, theta)
             escritor.grab_frame()
     return caminho
+
+
+# Item 1.2 dentro do PDF: os quadros da animação como imagens JPEG, com o mesmo desenho do
+# vídeo e menos quadros, para o PDF não ficar pesado.
+def quadros_jpeg(cfg: Config) -> list[bytes]:
+    h = cfg.hipocicloide
+    figura = Figure(figsize=(5.0, 5.0))
+    eixos = figura.subplots()
+    quadros = []
+    for theta in _angulos_da_animacao(cfg, h.quadros_pdf):
+        eixos.clear()
+        desenhar_rolamento(eixos, cfg, theta)
+        arquivo = io.BytesIO()
+        figura.savefig(arquivo, format="jpg", dpi=h.dpi_animacao, pil_kwargs={"quality": 85})
+        quadros.append(arquivo.getvalue())
+    return quadros

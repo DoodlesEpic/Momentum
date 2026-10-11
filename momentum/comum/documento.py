@@ -4,18 +4,33 @@
 
 """Elementos compartilhados dos relatórios em PDF."""
 
+import hashlib
 import io
+import re
+import tempfile
 import textwrap
 from pathlib import Path
 from xml.sax.saxutils import escape
 
 import matplotlib
 import numpy as np
+from matplotlib import mathtext
 from matplotlib.figure import Figure
+from matplotlib.font_manager import FontProperties
+from PIL import Image as ImagemPIL
 from pygments import lex
 from pygments.lexers import get_lexer_for_filename
 from pygments.styles import get_style_by_name
 from pypdf import PdfWriter
+from pypdf.generic import (
+    ArrayObject,
+    DictionaryObject,
+    FloatObject,
+    NameObject,
+    NumberObject,
+    StreamObject,
+    TextStringObject,
+)
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.fonts import addMapping
@@ -26,6 +41,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     CondPageBreak,
+    Flowable,
     Image,
     PageBreak,
     Paragraph,
@@ -45,6 +61,10 @@ LARGURA_CODIGO = 110
 ESTILO_CODIGO = "friendly"
 FONTE_UNICODE = "DejaVuSans"
 FONTE_CODIGO = "DejaVuSansMono"
+RESOLUCAO_FORMULAS = 600
+
+# Pasta temporária com as imagens das fórmulas, apagada quando o programa termina.
+_PASTA_FORMULAS = tempfile.TemporaryDirectory()
 
 
 # Registra a fonte DejaVu, que vem com o matplotlib, porque as fontes padrão do PDF não têm
@@ -91,6 +111,7 @@ def estilos() -> dict:
             leading=16,
             spaceBefore=10,
             spaceAfter=6,
+            autoLeading="max",
         ),
         "texto": ParagraphStyle(
             "texto",
@@ -99,6 +120,7 @@ def estilos() -> dict:
             fontSize=10,
             leading=14,
             spaceAfter=3,
+            autoLeading="max",
         ),
         "arquivo": ParagraphStyle(
             "arquivo",
@@ -115,11 +137,56 @@ def estilos() -> dict:
             fontSize=9,
             leading=12,
             alignment=TA_CENTER,
+            autoLeading="max",
+        ),
+        "cabecalho": ParagraphStyle(
+            "cabecalho",
+            parent=base["Normal"],
+            fontName=negrito,
+            fontSize=8,
+            leading=10,
+            alignment=TA_CENTER,
+            autoLeading="max",
         ),
         "codigo": ParagraphStyle(
             "codigo", parent=base["Code"], fontName=FONTE_CODIGO, fontSize=7.2, leading=8.6
         ),
     }
+
+
+# Desenha uma fórmula escrita na notação do LaTeX com o mathtext do matplotlib e grava um PNG
+# de alta resolução. Devolve o arquivo, a largura, a altura e a parte abaixo da linha, em pontos.
+def _desenhar_formula(tex: str, tamanho: float) -> tuple[Path, float, float, float]:
+    nome = hashlib.md5(f"{tamanho}{tex}".encode()).hexdigest()
+    caminho = Path(_PASTA_FORMULAS.name) / f"{nome}.png"
+    with matplotlib.rc_context({"mathtext.fontset": "dejavusans", "savefig.transparent": True}):
+        profundidade = mathtext.math_to_image(
+            f"${tex}$", caminho, prop=FontProperties(size=tamanho), dpi=RESOLUCAO_FORMULAS
+        )
+    largura, altura = ImagemPIL.open(caminho).size
+    escala = 72 / RESOLUCAO_FORMULAS
+    return caminho, largura * escala, altura * escala, profundidade
+
+
+# Troca cada trecho $...$ de um texto pela imagem da fórmula, apoiada na linha do texto como
+# uma palavra. Assim fórmulas curtas podem aparecer no meio de um parágrafo ou de uma tabela.
+def com_formulas(texto: str, tamanho: float = 10) -> str:
+    def imagem(trecho: re.Match) -> str:
+        caminho, largura, altura, profundidade = _desenhar_formula(trecho.group(1), tamanho)
+        return (
+            f'<img src="{caminho}" width="{largura:.2f}" height="{altura:.2f}" '
+            f'valign="{-profundidade:.2f}"/>'
+        )
+
+    return re.sub(r"\$(.+?)\$", imagem, texto)
+
+
+# Fórmula em destaque, centralizada em uma linha própria, para expressões longas ou com frações.
+def formula(tex: str, tamanho: float = 11) -> Image:
+    caminho, largura, altura, _ = _desenhar_formula(tex, tamanho)
+    imagem = Image(str(caminho), width=largura, height=altura)
+    imagem.spaceBefore = imagem.spaceAfter = 5
+    return imagem
 
 
 # Escreve um vetor como (x, y, z) com até seis algarismos significativos.
@@ -299,4 +366,96 @@ def anexar(caminho_pdf: str | Path, arquivo: str | Path) -> None:
     arquivo = Path(arquivo)
     escritor = PdfWriter(clone_from=caminho_pdf)
     escritor.add_attachment(arquivo.name, arquivo.read_bytes())
+    escritor.write(caminho_pdf)
+
+
+# Espaço vazio que anota a página e a posição em que foi desenhado. Reserva o lugar de uma
+# animação, que só pode ser colocada depois que o PDF fica pronto.
+class Reserva(Flowable):
+    def __init__(self, largura: float, altura: float) -> None:
+        super().__init__()
+        self.width, self.height = largura, altura
+        self.hAlign = "CENTER"
+        self.pagina, self.x, self.y = 0, 0.0, 0.0
+
+    # Chamado pelo ReportLab ao desenhar a página: guarda a página e o canto inferior esquerdo.
+    def draw(self) -> None:
+        self.pagina = self.canv.getPageNumber() - 1
+        self.x, self.y = self.canv.absolutePosition(0, 0)
+
+
+# Põe uma animação no lugar reservado. Cada quadro JPEG vira um botão de formulário com a
+# imagem, todos no mesmo lugar e escondidos menos o primeiro, e um JavaScript mostra um quadro
+# de cada vez. Leitores sem JavaScript mostram só o primeiro quadro.
+def animar(
+    caminho_pdf: str | Path, quadros: list[bytes], reserva: Reserva, por_segundo: int
+) -> None:
+    escritor = PdfWriter(clone_from=caminho_pdf)
+    pagina = escritor.pages[reserva.pagina]
+    largura, altura = reserva.width, reserva.height
+    canto = (reserva.x, reserva.y, reserva.x + largura, reserva.y + altura)
+    botoes = ArrayObject()
+    for indice, jpeg in enumerate(quadros):
+        pixels_x, pixels_y = ImagemPIL.open(io.BytesIO(jpeg)).size
+        imagem = StreamObject()
+        imagem.set_data(jpeg)
+        imagem.update(
+            {
+                NameObject("/Type"): NameObject("/XObject"),
+                NameObject("/Subtype"): NameObject("/Image"),
+                NameObject("/Width"): NumberObject(pixels_x),
+                NameObject("/Height"): NumberObject(pixels_y),
+                NameObject("/ColorSpace"): NameObject("/DeviceRGB"),
+                NameObject("/BitsPerComponent"): NumberObject(8),
+                NameObject("/Filter"): NameObject("/DCTDecode"),
+            }
+        )
+        aparencia = StreamObject()
+        aparencia.set_data(f"q {largura:.2f} 0 0 {altura:.2f} 0 0 cm /Quadro Do Q".encode())
+        aparencia.update(
+            {
+                NameObject("/Type"): NameObject("/XObject"),
+                NameObject("/Subtype"): NameObject("/Form"),
+                NameObject("/BBox"): ArrayObject(
+                    [FloatObject(0), FloatObject(0), FloatObject(largura), FloatObject(altura)]
+                ),
+                NameObject("/Resources"): DictionaryObject(
+                    {
+                        NameObject("/XObject"): DictionaryObject(
+                            {NameObject("/Quadro"): escritor._add_object(imagem)}
+                        )
+                    }
+                ),
+            }
+        )
+        botao = DictionaryObject(
+            {
+                NameObject("/Type"): NameObject("/Annot"),
+                NameObject("/Subtype"): NameObject("/Widget"),
+                NameObject("/FT"): NameObject("/Btn"),
+                NameObject("/Ff"): NumberObject(65536),  # botão de apertar, sem estado
+                NameObject("/T"): TextStringObject(f"quadro{indice}"),
+                NameObject("/Rect"): ArrayObject([FloatObject(valor) for valor in canto]),
+                NameObject("/F"): NumberObject(4 if indice == 0 else 6),  # 2 esconde, 4 imprime
+                NameObject("/AP"): DictionaryObject(
+                    {NameObject("/N"): escritor._add_object(aparencia)}
+                ),
+                NameObject("/P"): pagina.indirect_reference,
+            }
+        )
+        botoes.append(escritor._add_object(botao))
+    pagina[NameObject("/Annots")] = ArrayObject([*pagina.get("/Annots", []), *botoes])
+    escritor.root_object[NameObject("/AcroForm")] = DictionaryObject(
+        {NameObject("/Fields"): botoes}
+    )
+    escritor.add_js(
+        "var documento = this;\n"
+        "var quadro = 0;\n"
+        "function proximoQuadro() {\n"
+        '  documento.getField("quadro" + quadro).display = display.hidden;\n'
+        f"  quadro = (quadro + 1) % {len(quadros)};\n"
+        '  documento.getField("quadro" + quadro).display = display.visible;\n'
+        "}\n"
+        f'var relogio = app.setInterval("proximoQuadro()", {round(1000 / por_segundo)});\n'
+    )
     escritor.write(caminho_pdf)
