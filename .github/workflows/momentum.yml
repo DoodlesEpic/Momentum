@@ -53,7 +53,7 @@ jobs:
             echo "publicar=sim" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publicar a release com o código e o PDF
+      - name: Publicar a release com o código, os PDFs e a animação
         if: steps.release.outputs.publicar == 'sim'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -61,7 +61,9 @@ jobs:
         run: |
           cp saida/tarefa_1.pdf "momentum-tarefa-1-v$VERSAO.pdf"
           cp saida/tarefa_2.pdf "momentum-tarefa-2-v$VERSAO.pdf"
-          gh release create "v$VERSAO" "momentum-tarefa-1-v$VERSAO.pdf" "momentum-tarefa-2-v$VERSAO.pdf" \
+          cp saida/tarefa_5.pdf "momentum-tarefa-5-v$VERSAO.pdf"
+          cp saida/tarefa_5_hipocicloide.gif "momentum-tarefa-5-hipocicloide-v$VERSAO.gif"
+          gh release create "v$VERSAO" momentum-tarefa-*-v"$VERSAO".* \
             --target "$GITHUB_SHA" \
             --title "Momentum v$VERSAO" \
-            --notes "Código-fonte e relatório em PDF da versão $VERSAO, gerados automaticamente."
+            --notes "Código-fonte, relatórios em PDF e animação da versão $VERSAO, gerados automaticamente."
