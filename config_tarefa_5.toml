@@ -1,0 +1,51 @@
+# Configuração da Tarefa Optativa 5.
+
+saida_pdf = "saida/tarefa_5.pdf"
+saida_animacao = "saida/tarefa_5_hipocicloide.gif"
+dpi = 200
+
+# Parte 1. Todos os ângulos θ estão em graus. R = 3r é o exemplo do capítulo 3.
+[hipocicloide]
+raio_aro = 3.0
+raio_disco = 1.0
+razoes = [3.0, 4.0, 6.0, 2.5]
+voltas_maximas = 12
+instantaneos = [0.0, 50.0, 110.0, 180.0, 260.0, 330.0]
+posicoes_curvatura = [15.0, 60.0, 100.0, 230.0]
+posicoes_versores = [20.0, 60.0, 100.0, 140.0, 180.0, 220.0, 260.0, 300.0, 340.0]
+# π/60 rad/s
+omega = 0.05235987755982988
+instantes = [10.0, 20.0, 35.0]
+pontos_da_curva = 2000
+quadros = 120
+quadros_por_segundo = 20
+dpi_animacao = 100
+# Fração de R ocupada pelo maior vetor desenhado
+escala_velocidade = 0.4
+escala_aceleracao = 0.4
+
+# Parte 2
+[cubica]
+lambda_minimo = -1.3
+lambda_maximo = 1.3
+parametros = [-1.0, 0.5, 1.2]
+comprimento_versores = 0.75
+pontos_da_curva = 400
+
+[cores]
+aro = "#7f7f7f"
+disco = "#1f77b4"
+curva = "#d62728"
+ponto = "#000000"
+tangente = "#2ca02c"
+normal = "#9467bd"
+binormal = "#ff7f0e"
+velocidade = "#2ca02c"
+aceleracao = "#9467bd"
+curvatura = "#17becf"
+
+[vista]
+nome = "Perspectiva da curva"
+descricao = "Perspectiva escolhida para separar os três versores de cada triedro."
+elevacao = 24.0
+azimute = -62.0

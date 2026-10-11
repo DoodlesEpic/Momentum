@@ -36,7 +36,7 @@ class Hipocicloide:
     razoes: tuple = (3.0, 4.0, 6.0, 2.5)
     voltas_maximas: int = 12
     instantaneos: tuple = (0.0, 50.0, 110.0, 180.0, 260.0, 330.0)
-    posicoes_curvatura: tuple = (15.0, 40.0, 60.0, 100.0, 190.0, 230.0)
+    posicoes_curvatura: tuple = (15.0, 60.0, 100.0, 230.0)
     posicoes_versores: tuple = (20.0, 60.0, 100.0, 140.0, 180.0, 220.0, 260.0, 300.0, 340.0)
     omega: float = math.pi / 60
     instantes: tuple = (10.0, 20.0, 35.0)
@@ -54,7 +54,9 @@ class Hipocicloide:
         if not 0.0 < self.raio_disco < self.raio_aro:
             raise ValueError("os raios devem satisfazer 0 < r < R")
         if math.isclose(self.raio_aro, 2 * self.raio_disco):
-            raise ValueError("com R = 2r a hipociclóide é um segmento e o raio de curvatura é infinito")
+            raise ValueError(
+                "com R = 2r a hipociclóide é um segmento e o raio de curvatura é infinito"
+            )
         if min(self.razoes) <= 1.0:
             raise ValueError("as razões R/r devem ser maiores que 1")
 
@@ -63,10 +65,10 @@ class Hipocicloide:
 class Cubica:
     """Trecho desenhado da curva e os três pontos do triedro de Frenet."""
 
-    lambda_minimo: float = -1.4
-    lambda_maximo: float = 1.4
+    lambda_minimo: float = -1.3
+    lambda_maximo: float = 1.3
     parametros: tuple = (-1.0, 0.5, 1.2)
-    comprimento_versores: float = 0.6
+    comprimento_versores: float = 0.75
     pontos_da_curva: int = 400
 
     def __post_init__(self) -> None:

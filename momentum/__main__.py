@@ -13,6 +13,12 @@ RAIZ = Path(__file__).resolve().parent.parent
 CONFIGS_PADRAO = {
     "tarefa1": RAIZ / "config_tarefa_1.toml",
     "tarefa2": RAIZ / "config_tarefa_2.toml",
+    "tarefa5": RAIZ / "config_tarefa_5.toml",
+}
+MODULOS_DE_CALCULO = {
+    "tarefa1": ["campo.py"],
+    "tarefa2": ["sistema.py"],
+    "tarefa5": ["hipocicloide.py", "cubica.py"],
 }
 
 
@@ -23,13 +29,14 @@ def _argumentos() -> argparse.Namespace:
     )
     analisador.add_argument("--version", action="version", version=f"Momentum {__version__}")
     subcomandos = analisador.add_subparsers(dest="tarefa")
-    for nome, titulo in (("tarefa1", "Tarefa 1"), ("tarefa2", "Tarefa 2")):
+    for nome, caminho in CONFIGS_PADRAO.items():
+        titulo = nome.replace("tarefa", "Tarefa ")
         comando = subcomandos.add_parser(nome, help=f"gera o PDF da {titulo}")
         comando.add_argument(
             "-c",
             "--config",
             default=None,
-            help=f"arquivo TOML de configuração (padrão: {CONFIGS_PADRAO[nome].name})",
+            help=f"arquivo TOML de configuração (padrão: {caminho.name})",
         )
         comando.add_argument("-s", "--saida", default=None, help="caminho do PDF gerado")
     return analisador.parse_args()
@@ -46,12 +53,9 @@ def _caminho_config(tarefa: str, argumento: str | None) -> Path | None:
 def _arquivos_do_codigo(tarefa: str, caminho_config: Path | None) -> list[Path]:
     """Fontes essenciais de calculo e configuracao que entram no PDF da tarefa."""
     pacote = Path(__file__).parent
-    modulo_calculo = "campo.py" if tarefa == "tarefa1" else "sistema.py"
     subpacote = tarefa.replace("tarefa", "tarefa_")
-    arquivos = [
-        pacote / "comum" / "vetores.py",
-        pacote / subpacote / modulo_calculo,
-    ]
+    arquivos = [pacote / "comum" / "vetores.py"]
+    arquivos += [pacote / subpacote / modulo for modulo in MODULOS_DE_CALCULO[tarefa]]
     if caminho_config is not None and caminho_config.exists():
         arquivos.append(caminho_config)
     return arquivos
@@ -85,6 +89,26 @@ def _gerar_tarefa_2(configuracao: str | None, caminho_da_saida: str | None) -> N
     print(f"PDF gerado em {saida.resolve()}")
 
 
+def _gerar_tarefa_5(configuracao: str | None, caminho_da_saida: str | None) -> None:
+    from .tarefa_5 import config, cubica, desenho, hipocicloide, relatorio
+
+    caminho_config = _caminho_config("tarefa5", configuracao)
+    cfg = config.carregar(caminho_config)
+    h = cfg.hipocicloide
+    R, r = h.raio_aro, h.raio_disco
+    curvaturas = [hipocicloide.curvatura(R, r, theta) for theta in h.posicoes_curvatura]
+    versores = [hipocicloide.curvatura(R, r, theta) for theta in h.posicoes_versores]
+    cinematicas = [hipocicloide.cinematica(R, r, h.omega, t) for t in h.instantes]
+    triedros = [cubica.triedro(parametro) for parametro in cfg.cubica.parametros]
+    animacao = desenho.gravar_animacao(cfg)
+    saida = Path(caminho_da_saida or cfg.saida_pdf)
+    arquivos = _arquivos_do_codigo("tarefa5", caminho_config)
+    relatorio.gerar_pdf(cfg, curvaturas, versores, cinematicas, triedros, arquivos, saida)
+    print(f"Tarefa 5: hipociclóide com R/r = {R / r:g} e {len(triedros)} triedros de Frenet.")
+    print(f"Animação gravada em {animacao.resolve()}")
+    print(f"PDF gerado em {saida.resolve()}")
+
+
 def main() -> None:
     argumentos = _argumentos()
     if argumentos.tarefa in (None, "tarefa1"):
@@ -93,6 +117,10 @@ def main() -> None:
         )
     if argumentos.tarefa in (None, "tarefa2"):
         _gerar_tarefa_2(
+            getattr(argumentos, "config", None), getattr(argumentos, "saida", None)
+        )
+    if argumentos.tarefa in (None, "tarefa5"):
+        _gerar_tarefa_5(
             getattr(argumentos, "config", None), getattr(argumentos, "saida", None)
         )
 
