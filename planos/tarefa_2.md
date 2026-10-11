@@ -4,7 +4,7 @@
 
 O Momentum hoje é um programa só, o da Tarefa Optativa 1 de PME0100 (campo de
 momentos de uma força), com os cinco módulos ocupando a raiz do pacote. A Tarefa
-Optativa 2, cujo enunciado está em [tarefa_2.md](tarefa_2.md), pede um programa
+Optativa 2, cujo enunciado está em [tarefa_2.md](../enunciados/tarefa_2.md), pede um programa
 diferente: reduzir um sistema de `n` forças aplicadas a um corpo rígido,
 calcular resultante, momentos em dois polos, torque em um eixo, invariante
 escalar, caracterizar o sistema, achar o eixo central e o momento mínimo, e
@@ -51,7 +51,7 @@ momentum/
 
 ### `comum/vetores.py`
 
-Recebe, sem alteração, o que hoje está em [momentum/campo.py](momentum/campo.py):
+Recebe, sem alteração, o que hoje está em [momentum/campo.py](../momentum/campo.py):
 `versor`, `base_do_plano`, `momento` (a convenção `M(O) = (P - O) x F` já é
 exatamente a que a tarefa 2 precisa) e `pe_da_perpendicular`.
 
@@ -64,7 +64,7 @@ def segmento_da_reta(ponto, direcao, comprimento) -> tuple[np.ndarray, np.ndarra
 
 ### `comum/cena.py`
 
-Extrai de [momentum/desenho.py](momentum/desenho.py) o que hoje está embutido na
+Extrai de [momentum/desenho.py](../momentum/desenho.py) o que hoje está embutido na
 função `figura`, que é um bloco de 60 linhas sem nenhum helper reaproveitável:
 
 | Função | Origem |
@@ -93,7 +93,7 @@ class Vista(cena.Vista):
 
 ### `comum/documento.py`
 
-Recebe de [momentum/relatorio.py](momentum/relatorio.py) tudo que não é texto da
+Recebe de [momentum/relatorio.py](../momentum/relatorio.py) tudo que não é texto da
 tarefa 1: as constantes `AUTOR`, `ID_USP`, `DISCIPLINA`, `LARGURA_CODIGO`,
 `ESTILO_CODIGO`, e as funções `estilos`, `vetor`, `codigo_colorido` e
 `paginas_do_codigo`, todas já genéricas hoje.
@@ -281,12 +281,12 @@ Documento montado com `comum/documento.py`:
 
 - `pyproject.toml`: versão para `2.0.0`, o que dispara a release no workflow, e
   descrição atualizada para as duas tarefas.
-- [.github/workflows/momentum.yml](.github/workflows/momentum.yml): o passo de
+- [.github/workflows/momentum.yml](../.github/workflows/momentum.yml): o passo de
   execução continua `uv run momentum`, o artefato passa a apontar para `saida/`
   com os dois PDFs, e o `gh release create` recebe os dois arquivos.
-- [README.md](README.md): tabela de estrutura, seção de uso com os subcomandos,
+- [README.md](../README.md): tabela de estrutura, seção de uso com os subcomandos,
   seção de configuração com os dois TOMLs, e uma seção sobre a tarefa 2.
-- [AGENTS.md](AGENTS.md): remover a nota de que o código da tarefa 1 ainda ocupa
+- [AGENTS.md](../AGENTS.md): remover a nota de que o código da tarefa 1 ainda ocupa
   a raiz do pacote e descrever a divisão em `comum/`, `tarefa_1/` e `tarefa_2/`.
 
 ## Verificação

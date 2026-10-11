@@ -2,7 +2,7 @@
 
 ## Contexto
 
-A Tarefa Optativa 5, cujo enunciado está em [tarefa_5.md](tarefa_5.md), pede
+A Tarefa Optativa 5, cujo enunciado está em [tarefa_5.md](../enunciados/tarefa_5.md), pede
 dois programas de cinemática do ponto e geometria de curvas:
 
 1. A hipociclóide traçada por um ponto `P` de um disco de raio `r` que rola sem
@@ -22,7 +22,7 @@ Decisões:
 | Assunto | Decisão |
 | --- | --- |
 | Estrutura | subpacote `tarefa_5/` com um módulo de cálculo para cada programa |
-| Configuração | `config_tarefa_5.toml`, com as seções `[hipocicloide]` e `[cubica]` |
+| Configuração | `config/tarefa_5.toml`, com as seções `[hipocicloide]` e `[cubica]` |
 | Linha de comando | subcomando `tarefa5`, e sem subcomando o programa gera as três tarefas |
 | Saídas | um PDF com as duas partes e um GIF com a animação do item 1.2 |
 | Animação | `matplotlib.animation` com o `PillowWriter`, sem dependência nova, já que o Pillow vem com o matplotlib |

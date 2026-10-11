@@ -11,9 +11,9 @@ from . import __version__
 
 RAIZ = Path(__file__).resolve().parent.parent
 CONFIGS_PADRAO = {
-    "tarefa1": RAIZ / "config_tarefa_1.toml",
-    "tarefa2": RAIZ / "config_tarefa_2.toml",
-    "tarefa5": RAIZ / "config_tarefa_5.toml",
+    "tarefa1": RAIZ / "config" / "tarefa_1.toml",
+    "tarefa2": RAIZ / "config" / "tarefa_2.toml",
+    "tarefa5": RAIZ / "config" / "tarefa_5.toml",
 }
 MODULOS_DE_CALCULO = {
     "tarefa1": ["campo.py"],
