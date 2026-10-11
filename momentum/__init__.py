@@ -4,5 +4,5 @@
 
 """Programas das tarefas optativas de PME0100 Mecânica I."""
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 
