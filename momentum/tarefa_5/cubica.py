@@ -11,10 +11,9 @@ import numpy as np
 from ..comum import vetores
 
 
+# Ponto da curva com o raio de curvatura e os versores τ, n e b do triedro de Frenet.
 @dataclass
 class Triedro:
-    """Ponto da curva com o raio de curvatura e os versores τ, n e b."""
-
     parametro: float
     ponto: np.ndarray
     raio: float
@@ -23,18 +22,15 @@ class Triedro:
     binormal: np.ndarray
 
 
+# Pontos r(λ) = (λ, λ², λ³) da curva C, um ponto por linha.
 def posicao(parametro) -> np.ndarray:
-    """Pontos (λ, λ², λ³), um por linha."""
     return np.stack([parametro, parametro**2, parametro**3], axis=-1)
 
 
+# Triedro de Frenet no ponto de parâmetro λ. Deriva r(λ) à mão, r' = (1, 2λ, 3λ²) e
+# r'' = (0, 2, 6λ), e aplica o procedimento da seção 16 do capítulo 3.
 def triedro(parametro: float) -> Triedro:
-    """Triedro de Frenet pelo procedimento do capítulo 3 das notas de aula."""
     primeira = np.array([1.0, 2 * parametro, 3 * parametro**2])
     segunda = np.array([0.0, 2.0, 6 * parametro])
-    produto = np.cross(primeira, segunda)
-    raio = np.linalg.norm(primeira) ** 3 / np.linalg.norm(produto)
-    tangente = vetores.versor(primeira)
-    binormal = vetores.versor(produto)
-    normal = np.cross(binormal, tangente)
+    raio, tangente, normal, binormal = vetores.frenet(primeira, segunda)
     return Triedro(parametro, posicao(parametro), raio, tangente, normal, binormal)
